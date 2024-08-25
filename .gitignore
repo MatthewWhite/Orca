@@ -1,0 +1,7 @@
+# Visual Studio files/directories
+*.user
+*.vs
+
+# Temporary and Output directories for Orca
+bin/*
+tmp/*
