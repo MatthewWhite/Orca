@@ -4,41 +4,22 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/vec3.hpp>
+
+#include "Renderer/ShaderProgram.h"
 
 void OnFramebufferResize(GLFWwindow* pWindow, int width, int height);
 void ProcessInput(GLFWwindow* pWindow);
 
-std::string GetFileContents(const std::string& filename)
-{
-    std::string contents = "";
-
-    std::FILE* file = std::fopen(filename.c_str(), "rb");
-    if (file)
-    {
-        std::fseek(file, 0, SEEK_END);
-        contents.resize(std::ftell(file));
-        std::rewind(file);
-        std::fread(&contents[0], 1, contents.size(), file);
-        std::fclose(file);
-    }
-    else
-    {
-        printf("Failed to load contents of file \"%s\". %s\n", filename.c_str(), strerror(errno));
-    }
-
-    return contents;
-}
-
 const float vertices[] = {
-    -0.5f, 0.5f, 0.0f,      // upper left
-    -0.5f, -0.5f, 0.0f,     // lower left
-    0.5f, -0.5f, 0.0f,      // lower right
-    0.5f, 0.5f, 0.0f,       // upper right
+    // position             color
+    0.0f, 0.5f, 0.0f,       1.0f, 0.0f, 0.0f,     // top middle     red
+    -0.5f, -0.5f, 0.0f,     0.0f, 1.0f, 0.0f,     // lower left     green
+    0.5f, -0.5f, 0.0f,      0.0f, 0.0f, 1.0f,     // lower right    blue
 };
 
 const unsigned int indices[] = {
     0, 1, 2,
-    2, 3, 0,
 };
 
 int main(int argc, char** argv)
@@ -71,57 +52,9 @@ int main(int argc, char** argv)
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     glfwSetFramebufferSizeCallback(pWindow, OnFramebufferResize);
 
-    auto CheckShaderCompileStatus = [](GLuint shader) -> void
-    {
-        GLint status;
-        glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-        if (!status)
-        {
-            char infoLog[512];
-            glGetShaderInfoLog(shader, 512, NULL, infoLog);
-            printf("Shader compilation failed. %s\n", infoLog);
-        }
-    };
-    auto CheckProgramLinkStatus = [](GLuint program) -> void
-    {
-        GLint status;
-        glGetProgramiv(program, GL_LINK_STATUS, &status);
-        if (!status)
-        {
-            char infoLog[512];
-            glGetProgramInfoLog(program, 512, NULL, infoLog);
-            printf("Program linking failed. %s\n", infoLog);
-        }
-    };
-
     // compile and link the shader program
     // -----------------------------------
-    // vertex shader
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    std::string vertexShaderSource = GetFileContents("assets/shaders/basic.vert");
-    const char* pVertexShaderSource = vertexShaderSource.c_str();
-    glShaderSource(vertexShader, 1, &pVertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-    CheckShaderCompileStatus(vertexShader);
-
-    // fragment shader
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    std::string fragmentShaderSource = GetFileContents("assets/shaders/basic.frag");
-    const char* pFragmentShaderSource = fragmentShaderSource.c_str();
-    glShaderSource(fragmentShader, 1, &pFragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-    CheckShaderCompileStatus(fragmentShader);
-
-    // link shaders together
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    CheckProgramLinkStatus(shaderProgram);
-
-    // can safely delete the shaders now they've been linked
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    ShaderProgram shaderProgram("assets/shaders/basic.vert", "assets/shaders/basic.frag");
 
     // set up vertex data and attributes
     // ------------------------------
@@ -138,8 +71,12 @@ int main(int argc, char** argv)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    // position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    // color
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
 
@@ -153,8 +90,9 @@ int main(int argc, char** argv)
         // ------
         glClear(GL_COLOR_BUFFER_BIT);
         glBindVertexArray(vao);
-        glUseProgram(shaderProgram);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        shaderProgram.Bind();
+        shaderProgram.SetUniform("time", glfwGetTime());
+        glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 
         // swap buffers and poll IO events
         // -------------------------------

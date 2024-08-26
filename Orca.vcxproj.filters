@@ -3,5 +3,9 @@
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="libs\glad\src\glad.c" />
+    <ClCompile Include="src\Renderer\ShaderProgram.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Renderer\ShaderProgram.h" />
   </ItemGroup>
 </Project>
