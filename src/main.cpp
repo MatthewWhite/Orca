@@ -5,6 +5,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "Renderer/ShaderProgram.h"
 #include "Renderer/Texture.h"
@@ -66,7 +67,6 @@ int main(int argc, char** argv)
     // compile and link the shader program
     // -----------------------------------
     ShaderProgram shaderProgram("assets/shaders/basic.vert", "assets/shaders/basic.frag");
-    shaderProgram.SetUniform("texture1", 0);
 
     // set up vertex data and attributes
     // ---------------------------------
@@ -97,12 +97,24 @@ int main(int argc, char** argv)
     // texture
     // -------
     Texture texture1("assets/textures/wall.jpg");
+    shaderProgram.SetUniform("texture1", 0);
 
     glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
 
+    float rotationSpeed = 45.0f;
+    float translationLimit = 0.4f;
+    float scaleSpeed = 2.0f;
+
+    // start currentTime 1 frame back so we don't get weird timing issues on the first frame
+    float deltaTime = 1.0f / 60.0f;
+    float currentTime = glfwGetTime() - deltaTime;
+    float previousTime = currentTime;
+
     while (!glfwWindowShouldClose(pWindow))
     {
-        float time = glfwGetTime();
+        previousTime = currentTime;
+        currentTime = glfwGetTime();
+        deltaTime = currentTime - previousTime;
 
         // input
         // -----
@@ -112,11 +124,18 @@ int main(int argc, char** argv)
         // ------
         glClear(GL_COLOR_BUFFER_BIT);
 
+        // transform
+        glm::mat4 transform = glm::mat4(1.0f);
+        transform = glm::translate(transform, glm::vec3(1.0f, 0.0f, 0.0f) * sinf(currentTime) * translationLimit);
+        transform = glm::rotate(transform, glm::radians(rotationSpeed * currentTime), glm::vec3(0.0f, 0.0f, 1.0f));
+        transform = glm::scale(transform, glm::vec3(sinf(currentTime * scaleSpeed) / 4 + 0.75f));
+        shaderProgram.SetUniform("transform", transform);
+
+        // do the actual rendering
         glBindVertexArray(vao);
         shaderProgram.Bind();
         glActiveTexture(GL_TEXTURE0);
         texture1.Bind();
-        shaderProgram.SetUniform("time", time);
         glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 
         // swap buffers and poll IO events

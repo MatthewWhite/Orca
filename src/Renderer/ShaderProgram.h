@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 
-#include <glm/vec3.hpp>
+#include <glm/glm.hpp>
 
 typedef unsigned int shaderId_t;
 
@@ -19,6 +19,7 @@ public:
     void SetUniform(const std::string& name, int value);
     void SetUniform(const std::string& name, float value);
     void SetUniform(const std::string& name, const glm::vec3& value);
+    void SetUniform(const std::string& name, const glm::mat4& value);
 
 private:
     shaderId_t mId;

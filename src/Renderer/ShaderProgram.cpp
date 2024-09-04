@@ -112,6 +112,11 @@ void ShaderProgram::SetUniform(const std::string& name, const glm::vec3& value)
     glUniform3fv(GetUniformLocation(name), 1, glm::value_ptr(value));
 }
 
+void ShaderProgram::SetUniform(const std::string& name, const glm::mat4& value)
+{
+    glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
+}
+
 int ShaderProgram::GetUniformLocation(const std::string& name)
 {
     auto it = mUniformLocationMap.find(name);
