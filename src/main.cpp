@@ -4,18 +4,26 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <glm/vec3.hpp>
+#include <glm/glm.hpp>
 
 #include "Renderer/ShaderProgram.h"
+#include "Renderer/Texture.h"
 
 void OnFramebufferResize(GLFWwindow* pWindow, int width, int height);
 void ProcessInput(GLFWwindow* pWindow);
 
-const float vertices[] = {
-    // position             color
-    0.0f, 0.5f, 0.0f,       1.0f, 0.0f, 0.0f,     // top middle     red
-    -0.5f, -0.5f, 0.0f,     0.0f, 1.0f, 0.0f,     // lower left     green
-    0.5f, -0.5f, 0.0f,      0.0f, 0.0f, 1.0f,     // lower right    blue
+struct Vertex
+{
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec2 texCoord;
+};
+
+const Vertex vertices[] = {
+    // position                 // normal               // texCoord
+    {{0.0f, 0.5f, 0.0f},        {1.0f, 0.0f, 0.0f},     {0.5f, 1.0f}},     // top middle     red
+    {{-0.5f, -0.5f, 0.0f},      {0.0f, 1.0f, 0.0f},     {0.0f, 0.0f}},     // lower left     green
+    {{0.5f, -0.5f, 0.0f},       {0.0f, 0.0f, 1.0f},     {1.0f, 0.0f}},     // lower right    blue
 };
 
 const unsigned int indices[] = {
@@ -52,12 +60,16 @@ int main(int argc, char** argv)
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     glfwSetFramebufferSizeCallback(pWindow, OnFramebufferResize);
 
+    // initialize our texture loader
+    Texture::InitTextureLoader();
+
     // compile and link the shader program
     // -----------------------------------
     ShaderProgram shaderProgram("assets/shaders/basic.vert", "assets/shaders/basic.frag");
+    shaderProgram.SetUniform("texture1", 0);
 
     // set up vertex data and attributes
-    // ------------------------------
+    // ---------------------------------
     GLuint vao, vbo, ebo;
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
@@ -68,20 +80,30 @@ int main(int argc, char** argv)
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    // NOTE: VAO stores any EBO bound, so don't unbind EBO until VAO is unbound
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
     glEnableVertexAttribArray(0);
-    // color
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    // color/normal
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
     glEnableVertexAttribArray(1);
+    // uvs
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
+    glEnableVertexAttribArray(2);
+
+    // texture
+    // -------
+    Texture texture1("assets/textures/wall.jpg");
 
     glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
 
     while (!glfwWindowShouldClose(pWindow))
     {
+        float time = glfwGetTime();
+
         // input
         // -----
         ProcessInput(pWindow);
@@ -89,9 +111,12 @@ int main(int argc, char** argv)
         // render
         // ------
         glClear(GL_COLOR_BUFFER_BIT);
+
         glBindVertexArray(vao);
         shaderProgram.Bind();
-        shaderProgram.SetUniform("time", glfwGetTime());
+        glActiveTexture(GL_TEXTURE0);
+        texture1.Bind();
+        shaderProgram.SetUniform("time", time);
         glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 
         // swap buffers and poll IO events

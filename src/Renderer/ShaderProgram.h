@@ -16,6 +16,7 @@ public:
 
     void Bind();
 
+    void SetUniform(const std::string& name, int value);
     void SetUniform(const std::string& name, float value);
     void SetUniform(const std::string& name, const glm::vec3& value);
 

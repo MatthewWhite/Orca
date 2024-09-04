@@ -6,6 +6,8 @@
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Core/Utils.h"
+
 
 shaderId_t ShaderProgram::sCurrentProgram = 0;
 
@@ -13,28 +15,6 @@ ShaderProgram::ShaderProgram(const std::string& vertexShaderPath, const std::str
     : mId(0)
     , mUniformLocationMap()
 {
-    // TODO: move file reading to some utilities/IO file
-    auto GetFileContents = [](const std::string& filename) -> std::string
-    {
-        std::string contents = "";
-
-        std::FILE* file = std::fopen(filename.c_str(), "rb");
-        if (file)
-        {
-            std::fseek(file, 0, SEEK_END);
-            contents.resize(std::ftell(file));
-            std::rewind(file);
-            std::fread(&contents[0], 1, contents.size(), file);
-            std::fclose(file);
-        }
-        else
-        {
-            printf("Failed to load contents of file \"%s\". %s\n", filename.c_str(), strerror(errno));
-        }
-
-        return contents;
-    };
-
     auto CheckShaderCompileStatus = [](GLuint shader) -> void
     {
         GLint status;
@@ -59,27 +39,27 @@ ShaderProgram::ShaderProgram(const std::string& vertexShaderPath, const std::str
     };
 
     // vertex shader
-    std::string vertexShaderSource = GetFileContents(vertexShaderPath);
-    if (vertexShaderSource.empty())
+    char* pVertexShaderSource = (char*)LoadFileContents(vertexShaderPath);
+    if (!pVertexShaderSource)
     {
         printf("Failed to generate shader program. Invalid vertex shader \"%s\"\n", vertexShaderPath.c_str());
         return;
     }
-    const char* const pVertexShaderSource = vertexShaderSource.c_str();
+    //const char* const pVertexShaderSource = vertexShaderSource.c_str();
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &pVertexShaderSource, NULL);
     glCompileShader(vertexShader);
     CheckShaderCompileStatus(vertexShader);
 
     // fragment shader
-    std::string fragmentShaderSource = GetFileContents(fragmentShaderPath);
-    if (fragmentShaderSource.empty())
+    char* pFragmentShaderSource = (char*)LoadFileContents(fragmentShaderPath);
+    if (!pFragmentShaderSource)
     {
         printf("Failed to generate shader program. Invalid fragment shader \"%s\"\n", fragmentShaderPath.c_str());
         glDeleteShader(vertexShader);
         return;
     }
-    const char* const pFragmentShaderSource = fragmentShaderSource.c_str();
+    //const char* const pFragmentShaderSource = fragmentShaderSource.c_str();
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &pFragmentShaderSource, NULL);
     glCompileShader(fragmentShader);
@@ -93,6 +73,8 @@ ShaderProgram::ShaderProgram(const std::string& vertexShaderPath, const std::str
     CheckProgramLinkStatus(mId);
 
     // clean up source code pointers and delete shaders
+    delete[] pVertexShaderSource;
+    delete[] pFragmentShaderSource;
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
@@ -112,6 +94,12 @@ void ShaderProgram::Bind()
     }
 
     glUseProgram(mId);
+    sCurrentProgram = mId;
+}
+
+void ShaderProgram::SetUniform(const std::string& name, int value)
+{
+    glUniform1i(GetUniformLocation(name), value);
 }
 
 void ShaderProgram::SetUniform(const std::string& name, float value)
