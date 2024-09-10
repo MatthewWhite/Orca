@@ -22,15 +22,55 @@ struct Vertex
 
 const Vertex vertices[] = {
 	// position                 // normal/color         // texCoord
-	{{-0.5f, 0.5f, 0.0f},		{1.0f, 0.0f, 0.0f},		{0.0f, 1.0f}},		// upper left		red
-	{{-0.5f, -0.5f, 0.0f},		{0.0f, 1.0f, 0.0f},		{0.0f, 0.0f}},		// lower left		green
-	{{0.5f, -0.5f, 0.0f},		{0.0f, 0.0f, 1.0f},		{1.0f, 0.0f}},		// lower right		blue
-	{{0.5f, 0.5f, 0.0f},		{0.0f, 1.0f, 1.0f},		{1.0f, 1.0f}},		// upper right		yellow
+	{{-0.5f, 0.5f, 0.5f},		{1.0f, 0.0f, 0.0f},		{0.0f, 1.0f}},		// front upper left
+	{{-0.5f, -0.5f, 0.5f},		{0.0f, 1.0f, 0.0f},		{0.0f, 0.0f}},		// front lower left
+	{{0.5f, -0.5f, 0.5f},		{0.0f, 0.0f, 1.0f},		{1.0f, 0.0f}},		// front lower right
+	{{0.5f, 0.5f, 0.5f},		{1.0f, 1.0f, 0.0f},		{1.0f, 1.0f}},		// front upper right
+
+	{{0.5f, 0.5f, -0.5f},		{1.0f, 0.0f, 0.0f},		{0.0f, 1.0f}},		// back upper left
+	{{0.5f, -0.5f, -0.5f},		{0.0f, 1.0f, 0.0f},		{0.0f, 0.0f}},		// back lower left
+	{{-0.5f, -0.5f, -0.5f},		{0.0f, 0.0f, 1.0f},		{1.0f, 0.0f}},		// back lower right
+	{{-0.5f, 0.5f, -0.5f},		{1.0f, 1.0f, 0.0f},		{1.0f, 1.0f}},		// back upper right
+
+	{{-0.5f, 0.5f, -0.5f},		{1.0f, 0.0f, 0.0f},		{0.0f, 1.0f}},		// left upper left
+	{{-0.5f, -0.5f, -0.5f},		{0.0f, 1.0f, 0.0f},		{0.0f, 0.0f}},		// left lower left
+	{{-0.5f, -0.5f, 0.5f},		{0.0f, 0.0f, 1.0f},		{1.0f, 0.0f}},		// left lower right
+	{{-0.5f, 0.5f, 0.5f},		{1.0f, 1.0f, 0.0f},		{1.0f, 1.0f}},		// left upper right
+
+	{{0.5f, 0.5f, 0.5f},		{1.0f, 0.0f, 0.0f},		{0.0f, 1.0f}},		// right upper left
+	{{0.5f, -0.5f, 0.5f},		{0.0f, 1.0f, 0.0f},		{0.0f, 0.0f}},		// right lower left
+	{{0.5f, -0.5f, -0.5f},		{0.0f, 0.0f, 1.0f},		{1.0f, 0.0f}},		// right lower right
+	{{0.5f, 0.5f, -0.5f},		{1.0f, 1.0f, 0.0f},		{1.0f, 1.0f}},		// right upper right
+
+	{{-0.5f, 0.5f, -0.5f},		{1.0f, 0.0f, 0.0f},		{0.0f, 1.0f}},		// top upper left
+	{{-0.5f, 0.5f, 0.5f},		{0.0f, 1.0f, 0.0f},		{0.0f, 0.0f}},		// top lower left
+	{{0.5f, 0.5f, 0.5f},		{0.0f, 0.0f, 1.0f},		{1.0f, 0.0f}},		// top lower right
+	{{0.5f, 0.5f, -0.5f},		{1.0f, 1.0f, 0.0f},		{1.0f, 1.0f}},		// top upper right
+
+	{{-0.5f, -0.5f, 0.5f},		{1.0f, 0.0f, 0.0f},		{0.0f, 1.0f}},		// bottom upper left
+	{{-0.5f, -0.5f, -0.5f},		{0.0f, 1.0f, 0.0f},		{0.0f, 0.0f}},		// bottom lower left
+	{{0.5f, -0.5f, -0.5f},		{0.0f, 0.0f, 1.0f},		{1.0f, 0.0f}},		// bottom lower right
+	{{0.5f, -0.5f, 0.5f},		{1.0f, 1.0f, 0.0f},		{1.0f, 1.0f}},		// bottom upper right
 };
 
 const unsigned int indices[] = {
 	0, 1, 2,
 	2, 3, 0,
+
+	4, 5, 6,
+	6, 7, 4,
+
+	8, 9, 10,
+	10, 11, 8,
+
+	12, 13, 14,
+	14, 15, 12,
+
+	16, 17, 18,
+	18, 19, 16,
+
+	20, 21, 22,
+	22, 23, 20,
 };
 
 int main(int argc, char** argv)
@@ -71,7 +111,9 @@ int main(int argc, char** argv)
 
 	// compile and link shaders
 	// --------------------------------------------------------------------------
-	ShaderProgram shaderProgram("assets/shaders/basic.vert", "assets/shaders/basic.frag");
+	ShaderProgram standardShader("assets/shaders/standard.vert", "assets/shaders/standard.frag");
+	ShaderProgram blendedShader("assets/shaders/blended_textures.vert", "assets/shaders/blended_textures.frag");
+	ShaderProgram solidShader("assets/shaders/solid_color.vert", "assets/shaders/solid_color.frag");
 
 	// set up vertex data and attributes
 	// --------------------------------------------------------------------------
@@ -101,9 +143,17 @@ int main(int argc, char** argv)
 
 	// textures
 	// --------------------------------------------------------------------------
-	Texture texture1("assets/textures/wall.jpg");
-	shaderProgram.SetUniform("texture1", 0);
+	Texture texture1("assets/textures/container.jpg");
+	Texture texture2("assets/textures/awesomeface.png");
+	blendedShader.Bind();
+	blendedShader.SetUniform("texture1", 0);
+	blendedShader.SetUniform("texture2", 1);
+	standardShader.Bind();
+	standardShader.SetUniform("texture1", 0);
+	solidShader.Bind();
+	solidShader.SetUniform("color", glm::vec3(0.0f, 1.0f, 1.0f));
 
+	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
 
 	float rotationSpeed = 45.0f;
@@ -115,7 +165,22 @@ int main(int argc, char** argv)
 	const float fov = 45.0f;
 	const float nearPlane = 0.1f;
 	const float farPlane = 1000.0f;
-	glm::mat4 projection = glm::perspective(glm::radians(fov), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, nearPlane, farPlane);
+	glm::mat4 projectionMatrix = glm::perspective(glm::radians(fov), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, nearPlane, farPlane);
+	glm::mat4 viewMatrix = glm::mat4(1.0f);
+	viewMatrix = glm::translate(viewMatrix, glm::vec3(0.0f, 0.0f, -3.0f));
+
+	// cube transforms
+	// --------------------------------------------------------------------------
+	glm::mat4 transform = glm::mat4(1.0f);
+	transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, 0.0f));
+
+	glm::mat4 containerTransform = glm::mat4(1.0f);
+	containerTransform = glm::translate(containerTransform, glm::vec3(1.5f, 0.3f, -2.0f));
+	containerTransform = glm::rotate(containerTransform, glm::radians(60.0f), glm::vec3(1.0f, 0.3f, 0.5f));
+
+	glm::mat4 lightTransform = glm::mat4(1.0f);
+	lightTransform = glm::translate(lightTransform, glm::vec3(-2.2f, 1.3f, -0.7f));
+	lightTransform = glm::scale(lightTransform, glm::vec3(0.25f));
 
 	// start currentTime 1 frame back so we don't get weird timing issues on the first frame
 	float deltaTime = 1.0f / 60.0f;
@@ -132,22 +197,46 @@ int main(int argc, char** argv)
 		// ----------------------------------------------------------------------
 		ProcessInput(pWindow);
 
+		// update
+		// ----------------------------------------------------------------------
+		transform = glm::rotate(transform, glm::radians(rotationSpeed) * deltaTime, glm::vec3(1.0f, 1.0f, 1.0f));
+
 		// render
 		// ----------------------------------------------------------------------
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// transform
-		glm::mat4 transform = glm::mat4(1.0f);
-		transform = glm::translate(transform, glm::vec3(1.0f, 0.0f, 0.0f) * sinf(currentTime) * translationLimit);
-		transform = glm::rotate(transform, glm::radians(rotationSpeed * currentTime), glm::vec3(0.0f, 0.0f, 1.0f));
-		transform = glm::scale(transform, glm::vec3(sinf(currentTime * scaleSpeed) / 4 + 0.75f));
-		shaderProgram.SetUniform("transform", transform);
+		// bind our textures
+		glActiveTexture(GL_TEXTURE0);
+		texture1.Bind();
+		glActiveTexture(GL_TEXTURE1);
+		texture2.Bind();
+
+		// bind our matrices
+		blendedShader.Bind();
+		blendedShader.SetUniform("model", transform);
+		blendedShader.SetUniform("view", viewMatrix);
+		blendedShader.SetUniform("projection", projectionMatrix);
 
 		// do the actual rendering
 		glBindVertexArray(vao);
-		shaderProgram.Bind();
+		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
+
+		// repeat for container
+		// for completeness sake we'll rebind texture unit 0 here since in a real scene we would likely want to do that
 		glActiveTexture(GL_TEXTURE0);
 		texture1.Bind();
+
+		standardShader.Bind();
+		standardShader.SetUniform("model", containerTransform);
+		standardShader.SetUniform("view", viewMatrix);
+		standardShader.SetUniform("projection", projectionMatrix);
+		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
+
+		// repeat for light
+		solidShader.Bind();
+		solidShader.SetUniform("model", lightTransform);
+		solidShader.SetUniform("view", viewMatrix);
+		solidShader.SetUniform("projection", projectionMatrix);
 		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
 
 		// swap buffers and poll IO events
