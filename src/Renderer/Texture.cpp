@@ -5,134 +5,134 @@
 
 namespace
 {
-    const GLint OGL_WRAP_MODES[Texture::WrapMode::WM_COUNT] =
-    {
-        GL_REPEAT,              // WM_REPEAT
-        GL_CLAMP_TO_EDGE,       // WM_CLAMP
-        GL_MIRRORED_REPEAT,     // WM_MIRROR
-    };
+	const GLint OGL_WRAP_MODES[Texture::WrapMode::WM_COUNT] =
+	{
+		GL_REPEAT,              // WM_REPEAT
+		GL_CLAMP_TO_EDGE,       // WM_CLAMP
+		GL_MIRRORED_REPEAT,     // WM_MIRROR
+	};
 }
 
 textureId_t Texture::s_currentTexture = 0;
 
 void Texture::InitTextureLoader()
 {
-    stbi_set_flip_vertically_on_load(true);
+	stbi_set_flip_vertically_on_load(true);
 }
 
 Texture::Texture(const std::string& filename)
-    : mId(0)
-    , mWrapModeU(WrapMode::WM_INVALID)
-    , mWrapModeV(WrapMode::WM_INVALID)
-    , mFilterModeMin(FilterMode::FM_INVALID)
-    , mFilterModeMag(FilterMode::FM_INVALID)
-    , mWidth(0)
-    , mHeight(0)
+	: mId(0)
+	, mWrapModeU(WrapMode::WM_INVALID)
+	, mWrapModeV(WrapMode::WM_INVALID)
+	, mFilterModeMin(FilterMode::FM_INVALID)
+	, mFilterModeMag(FilterMode::FM_INVALID)
+	, mWidth(0)
+	, mHeight(0)
 {
-    int numChannels;
-    unsigned char* pTextureData = stbi_load(filename.c_str(), &mWidth, &mHeight, &numChannels, 0);
-    if (!pTextureData)
-    {
-        printf("Failed to load texture \"%s\"\n", filename.c_str());
-        return;
-    }
-    GLenum format = numChannels == 3 ? GL_RGB : GL_RGBA;
+	int numChannels;
+	unsigned char* pTextureData = stbi_load(filename.c_str(), &mWidth, &mHeight, &numChannels, 0);
+	if (!pTextureData)
+	{
+		printf("Failed to load texture \"%s\"\n", filename.c_str());
+		return;
+	}
+	GLenum format = numChannels == 3 ? GL_RGB : GL_RGBA;
 
-    glGenTextures(1, &mId);
-    Bind();
+	glGenTextures(1, &mId);
+	Bind();
 
-    glTexImage2D(GL_TEXTURE_2D, 0, format, mWidth, mHeight, 0, format, GL_UNSIGNED_BYTE, (void*)pTextureData);
+	glTexImage2D(GL_TEXTURE_2D, 0, format, mWidth, mHeight, 0, format, GL_UNSIGNED_BYTE, (void*)pTextureData);
 
-    SetWrapMode(WrapMode::WM_REPEAT);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    SetFilterMode(FilterMode::FM_LINEAR);
+	SetWrapMode(WrapMode::WM_REPEAT);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	SetFilterMode(FilterMode::FM_LINEAR);
 
-    stbi_image_free(pTextureData);
+	stbi_image_free(pTextureData);
 }
 
 void Texture::SetWrapMode(WrapMode wrapModeU, WrapMode wrapModeV)
 {
-    if (wrapModeV == WM_INVALID)
-    {
-        wrapModeV = wrapModeU;
-    }
+	if (wrapModeV == WM_INVALID)
+	{
+		wrapModeV = wrapModeU;
+	}
 
-    if (mWrapModeU == wrapModeU && mWrapModeV == wrapModeV)
-    {
-        // no change necessary
-        return;
-    }
+	if (mWrapModeU == wrapModeU && mWrapModeV == wrapModeV)
+	{
+		// no change necessary
+		return;
+	}
 
-    Bind();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, OGL_WRAP_MODES[wrapModeU]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, OGL_WRAP_MODES[wrapModeV]);
-    mWrapModeU = wrapModeU;
-    mWrapModeV = wrapModeV;
+	Bind();
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, OGL_WRAP_MODES[wrapModeU]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, OGL_WRAP_MODES[wrapModeV]);
+	mWrapModeU = wrapModeU;
+	mWrapModeV = wrapModeV;
 }
 
 void Texture::SetFilterMode(FilterMode filterModeMin, FilterMode filterModeMag)
 {
-    if (filterModeMag == FM_INVALID)
-    {
-        filterModeMag = filterModeMin;
-    }
+	if (filterModeMag == FM_INVALID)
+	{
+		filterModeMag = filterModeMin;
+	}
 
-    if (mFilterModeMin == filterModeMin && mFilterModeMag == filterModeMag)
-    {
-        // no change necessary
-        return;
-    }
+	if (mFilterModeMin == filterModeMin && mFilterModeMag == filterModeMag)
+	{
+		// no change necessary
+		return;
+	}
 
-    Bind();
+	Bind();
 
-    switch (filterModeMin)
-    {
-    case Texture::FM_NEAREST:
-        glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        break;
-    case Texture::FM_LINEAR:
-        glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        break;
-    case Texture::FM_NEARESTMIPMAP:
-        glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-        break;
-    case Texture::FM_TRILINIEARMIPMAP:
-        glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        break;
-    default:
-        printf("Unknown minification filter mode %i\n", filterModeMin);
-        break;
-    }
+	switch (filterModeMin)
+	{
+	case Texture::FM_NEAREST:
+		glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		break;
+	case Texture::FM_LINEAR:
+		glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		break;
+	case Texture::FM_NEARESTMIPMAP:
+		glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+		break;
+	case Texture::FM_TRILINIEARMIPMAP:
+		glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		break;
+	default:
+		printf("Unknown minification filter mode %i\n", filterModeMin);
+		break;
+	}
 
-    switch (filterModeMag)
-    {
-    case Texture::FM_NEAREST:
-        glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        break;
-    case Texture::FM_LINEAR:
-        glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        break;
-    default:
-        printf("Unknown/unsupported magnification filter mode %d\n", filterModeMag);
-        break;
-    }
+	switch (filterModeMag)
+	{
+	case Texture::FM_NEAREST:
+		glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		break;
+	case Texture::FM_LINEAR:
+		glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		break;
+	default:
+		printf("Unknown/unsupported magnification filter mode %d\n", filterModeMag);
+		break;
+	}
 
-    mFilterModeMin = filterModeMin;
-    mFilterModeMag = filterModeMag;
+	mFilterModeMin = filterModeMin;
+	mFilterModeMag = filterModeMag;
 }
 
 Texture::~Texture()
 {
-    glDeleteTextures(1, &mId);
+	glDeleteTextures(1, &mId);
 }
 
 void Texture::Bind()
 {
-    if (s_currentTexture == mId)
-    {
-        return;
-    }
+	if (s_currentTexture == mId)
+	{
+		return;
+	}
 
-    glBindTexture(GL_TEXTURE_2D, mId);
-    s_currentTexture = mId;
+	glBindTexture(GL_TEXTURE_2D, mId);
+	s_currentTexture = mId;
 }

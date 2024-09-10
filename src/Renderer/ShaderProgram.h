@@ -11,23 +11,23 @@ typedef unsigned int shaderId_t;
 class ShaderProgram
 {
 public:
-    ShaderProgram(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
-    ~ShaderProgram();
+	ShaderProgram(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+	~ShaderProgram();
 
-    void Bind();
+	void Bind();
 
-    void SetUniform(const std::string& name, int value);
-    void SetUniform(const std::string& name, float value);
-    void SetUniform(const std::string& name, const glm::vec3& value);
-    void SetUniform(const std::string& name, const glm::mat4& value);
+	void SetUniform(const std::string& name, int value);
+	void SetUniform(const std::string& name, float value);
+	void SetUniform(const std::string& name, const glm::vec3& value);
+	void SetUniform(const std::string& name, const glm::mat4& value);
 
 private:
-    shaderId_t mId;
-    std::map<std::string, int> mUniformLocationMap;
+	shaderId_t mId;
+	std::map<std::string, int> mUniformLocationMap;
 
-    int GetUniformLocation(const std::string& name);
+	int GetUniformLocation(const std::string& name);
 
-    static shaderId_t sCurrentProgram;
+	static shaderId_t sCurrentProgram;
 };
 
 #endif
