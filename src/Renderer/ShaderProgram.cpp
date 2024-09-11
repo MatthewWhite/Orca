@@ -126,6 +126,9 @@ int ShaderProgram::GetUniformLocation(const std::string& name)
 	}
 
 	GLint loc = glGetUniformLocation(mId, name.c_str());
-	mUniformLocationMap[name] = loc;
+	if (loc != GL_INVALID_INDEX)
+	{
+		mUniformLocationMap[name] = loc;
+	}
 	return loc;
 }

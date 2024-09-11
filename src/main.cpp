@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Renderer/Camera.h"
 #include "Renderer/ShaderProgram.h"
 #include "Renderer/Texture.h"
 
@@ -162,12 +163,12 @@ int main(int argc, char** argv)
 
 	// camera
 	// --------------------------------------------------------------------------
-	const float fov = 45.0f;
+	const float fov = 90.0f;
 	const float nearPlane = 0.1f;
 	const float farPlane = 1000.0f;
-	glm::mat4 projectionMatrix = glm::perspective(glm::radians(fov), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, nearPlane, farPlane);
-	glm::mat4 viewMatrix = glm::mat4(1.0f);
-	viewMatrix = glm::translate(viewMatrix, glm::vec3(0.0f, 0.0f, -3.0f));
+	Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT, fov, nearPlane, farPlane);
+	camera.SetPosition(glm::vec3(0.0f, 0.0f, -3.0f));
+	camera.LookAt(glm::vec3(0.0f));
 
 	// cube transforms
 	// --------------------------------------------------------------------------
@@ -175,11 +176,11 @@ int main(int argc, char** argv)
 	transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, 0.0f));
 
 	glm::mat4 containerTransform = glm::mat4(1.0f);
-	containerTransform = glm::translate(containerTransform, glm::vec3(1.5f, 0.3f, -2.0f));
+	containerTransform = glm::translate(containerTransform, glm::vec3(-1.5f, 0.3f, 2.0f));
 	containerTransform = glm::rotate(containerTransform, glm::radians(60.0f), glm::vec3(1.0f, 0.3f, 0.5f));
 
 	glm::mat4 lightTransform = glm::mat4(1.0f);
-	lightTransform = glm::translate(lightTransform, glm::vec3(-2.2f, 1.3f, -0.7f));
+	lightTransform = glm::translate(lightTransform, glm::vec3(2.2f, 1.3f, 0.7f));
 	lightTransform = glm::scale(lightTransform, glm::vec3(0.25f));
 
 	// start currentTime 1 frame back so we don't get weird timing issues on the first frame
@@ -200,6 +201,8 @@ int main(int argc, char** argv)
 		// update
 		// ----------------------------------------------------------------------
 		transform = glm::rotate(transform, glm::radians(rotationSpeed) * deltaTime, glm::vec3(1.0f, 1.0f, 1.0f));
+		const glm::mat4& projectionMatrix = camera.GetProjectionMatrix();
+		const glm::mat4& viewMatrix = camera.GetViewMatrix();
 
 		// render
 		// ----------------------------------------------------------------------
