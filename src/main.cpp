@@ -22,36 +22,36 @@ struct Vertex
 };
 
 const Vertex vertices[] = {
-	// position                 // normal/color         // texCoord
-	{{-0.5f, 0.5f, 0.5f},		{1.0f, 0.0f, 0.0f},		{0.0f, 1.0f}},		// front upper left
-	{{-0.5f, -0.5f, 0.5f},		{0.0f, 1.0f, 0.0f},		{0.0f, 0.0f}},		// front lower left
+	// position					// normal				// texCoord
+	{{-0.5f, 0.5f, 0.5f},		{0.0f, 0.0f, 1.0f},		{0.0f, 1.0f}},		// front upper left
+	{{-0.5f, -0.5f, 0.5f},		{0.0f, 0.0f, 1.0f},		{0.0f, 0.0f}},		// front lower left
 	{{0.5f, -0.5f, 0.5f},		{0.0f, 0.0f, 1.0f},		{1.0f, 0.0f}},		// front lower right
-	{{0.5f, 0.5f, 0.5f},		{1.0f, 1.0f, 0.0f},		{1.0f, 1.0f}},		// front upper right
+	{{0.5f, 0.5f, 0.5f},		{0.0f, 0.0f, 1.0f},		{1.0f, 1.0f}},		// front upper right
 
-	{{0.5f, 0.5f, -0.5f},		{1.0f, 0.0f, 0.0f},		{0.0f, 1.0f}},		// back upper left
-	{{0.5f, -0.5f, -0.5f},		{0.0f, 1.0f, 0.0f},		{0.0f, 0.0f}},		// back lower left
-	{{-0.5f, -0.5f, -0.5f},		{0.0f, 0.0f, 1.0f},		{1.0f, 0.0f}},		// back lower right
-	{{-0.5f, 0.5f, -0.5f},		{1.0f, 1.0f, 0.0f},		{1.0f, 1.0f}},		// back upper right
+	{{0.5f, 0.5f, -0.5f},		{0.0f, 0.0f, -1.0f},	{0.0f, 1.0f}},		// back upper left
+	{{0.5f, -0.5f, -0.5f},		{0.0f, 0.0f, -1.0f},	{0.0f, 0.0f}},		// back lower left
+	{{-0.5f, -0.5f, -0.5f},		{0.0f, 0.0f, -1.0f},	{1.0f, 0.0f}},		// back lower right
+	{{-0.5f, 0.5f, -0.5f},		{0.0f, 0.0f, -1.0f},	{1.0f, 1.0f}},		// back upper right
 
-	{{-0.5f, 0.5f, -0.5f},		{1.0f, 0.0f, 0.0f},		{0.0f, 1.0f}},		// left upper left
-	{{-0.5f, -0.5f, -0.5f},		{0.0f, 1.0f, 0.0f},		{0.0f, 0.0f}},		// left lower left
-	{{-0.5f, -0.5f, 0.5f},		{0.0f, 0.0f, 1.0f},		{1.0f, 0.0f}},		// left lower right
-	{{-0.5f, 0.5f, 0.5f},		{1.0f, 1.0f, 0.0f},		{1.0f, 1.0f}},		// left upper right
+	{{-0.5f, 0.5f, -0.5f},		{-1.0f, 0.0f, 0.0f},	{0.0f, 1.0f}},		// left upper left
+	{{-0.5f, -0.5f, -0.5f},		{-1.0f, 0.0f, 0.0f},	{0.0f, 0.0f}},		// left lower left
+	{{-0.5f, -0.5f, 0.5f},		{-1.0f, 0.0f, 0.0f},	{1.0f, 0.0f}},		// left lower right
+	{{-0.5f, 0.5f, 0.5f},		{-1.0f, 0.0f, 0.0f},	{1.0f, 1.0f}},		// left upper right
 
 	{{0.5f, 0.5f, 0.5f},		{1.0f, 0.0f, 0.0f},		{0.0f, 1.0f}},		// right upper left
-	{{0.5f, -0.5f, 0.5f},		{0.0f, 1.0f, 0.0f},		{0.0f, 0.0f}},		// right lower left
-	{{0.5f, -0.5f, -0.5f},		{0.0f, 0.0f, 1.0f},		{1.0f, 0.0f}},		// right lower right
-	{{0.5f, 0.5f, -0.5f},		{1.0f, 1.0f, 0.0f},		{1.0f, 1.0f}},		// right upper right
+	{{0.5f, -0.5f, 0.5f},		{1.0f, 0.0f, 0.0f},		{0.0f, 0.0f}},		// right lower left
+	{{0.5f, -0.5f, -0.5f},		{1.0f, 0.0f, 0.0f},		{1.0f, 0.0f}},		// right lower right
+	{{0.5f, 0.5f, -0.5f},		{1.0f, 0.0f, 0.0f},		{1.0f, 1.0f}},		// right upper right
 
-	{{-0.5f, 0.5f, -0.5f},		{1.0f, 0.0f, 0.0f},		{0.0f, 1.0f}},		// top upper left
+	{{-0.5f, 0.5f, -0.5f},		{0.0f, 1.0f, 0.0f},		{0.0f, 1.0f}},		// top upper left
 	{{-0.5f, 0.5f, 0.5f},		{0.0f, 1.0f, 0.0f},		{0.0f, 0.0f}},		// top lower left
-	{{0.5f, 0.5f, 0.5f},		{0.0f, 0.0f, 1.0f},		{1.0f, 0.0f}},		// top lower right
-	{{0.5f, 0.5f, -0.5f},		{1.0f, 1.0f, 0.0f},		{1.0f, 1.0f}},		// top upper right
+	{{0.5f, 0.5f, 0.5f},		{0.0f, 1.0f, 0.0f},		{1.0f, 0.0f}},		// top lower right
+	{{0.5f, 0.5f, -0.5f},		{0.0f, 1.0f, 0.0f},		{1.0f, 1.0f}},		// top upper right
 
-	{{-0.5f, -0.5f, 0.5f},		{1.0f, 0.0f, 0.0f},		{0.0f, 1.0f}},		// bottom upper left
-	{{-0.5f, -0.5f, -0.5f},		{0.0f, 1.0f, 0.0f},		{0.0f, 0.0f}},		// bottom lower left
-	{{0.5f, -0.5f, -0.5f},		{0.0f, 0.0f, 1.0f},		{1.0f, 0.0f}},		// bottom lower right
-	{{0.5f, -0.5f, 0.5f},		{1.0f, 1.0f, 0.0f},		{1.0f, 1.0f}},		// bottom upper right
+	{{-0.5f, -0.5f, 0.5f},		{0.0f, -1.0f, 0.0f},	{0.0f, 1.0f}},		// bottom upper left
+	{{-0.5f, -0.5f, -0.5f},		{0.0f, -1.0f, 0.0f},	{0.0f, 0.0f}},		// bottom lower left
+	{{0.5f, -0.5f, -0.5f},		{0.0f, -1.0f, 0.0f},	{1.0f, 0.0f}},		// bottom lower right
+	{{0.5f, -0.5f, 0.5f},		{0.0f, -1.0f, 0.0f},	{1.0f, 1.0f}},		// bottom upper right
 };
 
 const unsigned int indices[] = {
@@ -135,7 +135,7 @@ int main(int argc, char** argv)
 	// position
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
 	glEnableVertexAttribArray(0);
-	// color/normal
+	// normals
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
 	glEnableVertexAttribArray(1);
 	// uvs
@@ -149,10 +149,14 @@ int main(int argc, char** argv)
 	blendedShader.Bind();
 	blendedShader.SetUniform("texture1", 0);
 	blendedShader.SetUniform("texture2", 1);
+	blendedShader.SetUniform("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+	blendedShader.SetUniform("ambientColor", glm::vec3(0.2f, 0.2f, 0.2f));
 	standardShader.Bind();
 	standardShader.SetUniform("texture1", 0);
+	standardShader.SetUniform("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+	standardShader.SetUniform("ambientColor", glm::vec3(0.2f, 0.2f, 0.2f));
 	solidShader.Bind();
-	solidShader.SetUniform("color", glm::vec3(0.0f, 1.0f, 1.0f));
+	solidShader.SetUniform("color", glm::vec3(1.0f, 1.0f, 1.0f));
 
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
@@ -204,6 +208,8 @@ int main(int argc, char** argv)
 		const glm::mat4& projectionMatrix = camera.GetProjectionMatrix();
 		const glm::mat4& viewMatrix = camera.GetViewMatrix();
 
+		const glm::vec3 lightPos(lightTransform[3]);
+
 		// render
 		// ----------------------------------------------------------------------
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -219,6 +225,7 @@ int main(int argc, char** argv)
 		blendedShader.SetUniform("model", transform);
 		blendedShader.SetUniform("view", viewMatrix);
 		blendedShader.SetUniform("projection", projectionMatrix);
+		blendedShader.SetUniform("lightPosition", lightPos);
 
 		// do the actual rendering
 		glBindVertexArray(vao);
@@ -233,6 +240,7 @@ int main(int argc, char** argv)
 		standardShader.SetUniform("model", containerTransform);
 		standardShader.SetUniform("view", viewMatrix);
 		standardShader.SetUniform("projection", projectionMatrix);
+		standardShader.SetUniform("lightPosition", lightPos);
 		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
 
 		// repeat for light
