@@ -149,12 +149,8 @@ int main(int argc, char** argv)
 	blendedShader.Bind();
 	blendedShader.SetUniform("texture1", 0);
 	blendedShader.SetUniform("texture2", 1);
-	blendedShader.SetUniform("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-	blendedShader.SetUniform("ambientColor", glm::vec3(0.2f, 0.2f, 0.2f));
 	standardShader.Bind();
 	standardShader.SetUniform("texture1", 0);
-	standardShader.SetUniform("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-	standardShader.SetUniform("ambientColor", glm::vec3(0.2f, 0.2f, 0.2f));
 	solidShader.Bind();
 	solidShader.SetUniform("color", glm::vec3(1.0f, 1.0f, 1.0f));
 
@@ -186,6 +182,19 @@ int main(int argc, char** argv)
 	glm::mat4 lightTransform = glm::mat4(1.0f);
 	lightTransform = glm::translate(lightTransform, glm::vec3(2.2f, 1.3f, 0.7f));
 	lightTransform = glm::scale(lightTransform, glm::vec3(0.25f));
+
+	// lighting data
+	// --------------------------------------------------------------------------
+	glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+	float ambientStrength = 0.2f;
+
+	blendedShader.Bind();
+	blendedShader.SetUniform("lightColor", lightColor);
+	blendedShader.SetUniform("ambientStrength", ambientStrength);
+	standardShader.Bind();
+	standardShader.SetUniform("lightColor", lightColor);
+	standardShader.SetUniform("ambientStrength", ambientStrength);
+
 
 	// start currentTime 1 frame back so we don't get weird timing issues on the first frame
 	float deltaTime = 1.0f / 60.0f;
