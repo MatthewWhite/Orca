@@ -151,8 +151,6 @@ int main(int argc, char** argv)
 	blendedShader.SetUniform("texture2", 1);
 	standardShader.Bind();
 	standardShader.SetUniform("texture1", 0);
-	solidShader.Bind();
-	solidShader.SetUniform("color", glm::vec3(1.0f, 1.0f, 1.0f));
 
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
@@ -194,7 +192,8 @@ int main(int argc, char** argv)
 	standardShader.Bind();
 	standardShader.SetUniform("lightColor", lightColor);
 	standardShader.SetUniform("ambientStrength", ambientStrength);
-
+	solidShader.Bind();
+	solidShader.SetUniform("color", lightColor);
 
 	// start currentTime 1 frame back so we don't get weird timing issues on the first frame
 	float deltaTime = 1.0f / 60.0f;
