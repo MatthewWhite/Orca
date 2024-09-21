@@ -10,6 +10,8 @@ public:
 	Camera(int width, int height, float fov, float near, float far);
 	~Camera();
 
+	void Update(const float deltaTime);
+
 	void Translate(const glm::vec3& direction);
 	void LookAt(const glm::vec3& target);
 

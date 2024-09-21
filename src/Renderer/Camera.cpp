@@ -2,8 +2,12 @@
 
 #include <cstdio>
 
+#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/norm.hpp>
+
+#include "Core/InputManager.h"
 
 namespace
 {
@@ -38,6 +42,39 @@ Camera::~Camera()
 {
 }
 
+void Camera::Update(float deltaTime)
+{
+	const InputManager* const pInputManager = InputManager::GetInstance();
+	if (!pInputManager)
+	{
+		return;
+	}
+
+	glm::vec3 movementDirection(0.0f);
+
+	if (pInputManager->GetKeyState(Key::KEY_A))
+	{
+		movementDirection -= mRight;
+	}
+	if (pInputManager->GetKeyState(Key::KEY_D))
+	{
+		movementDirection += mRight;
+	}
+	if (pInputManager->GetKeyState(Key::KEY_W))
+	{
+		movementDirection += mForward;
+	}
+	if (pInputManager->GetKeyState(Key::KEY_S))
+	{
+		movementDirection -= mForward;
+	}
+
+	if (glm::length2(movementDirection) > 0.0f)
+	{
+		Translate(deltaTime * glm::normalize(movementDirection));
+	}
+}
+
 void Camera::Translate(const glm::vec3& direction)
 {
 	SetPosition(mPosition + direction);
@@ -46,8 +83,8 @@ void Camera::Translate(const glm::vec3& direction)
 void Camera::LookAt(const glm::vec3& target)
 {
 	mForward = glm::normalize(target - mPosition);
-	mRight = glm::cross(WORLD_UP, mForward);
-	mUp = glm::cross(mForward, mRight);
+	mRight = glm::cross(mForward, WORLD_UP);
+	mUp = glm::cross(mRight, mForward);
 
 	mbDirty = true;
 }

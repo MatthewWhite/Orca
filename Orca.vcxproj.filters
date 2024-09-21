@@ -7,6 +7,7 @@
     <ClCompile Include="src\Renderer\Texture.cpp" />
     <ClCompile Include="src\Core\Utils.cpp" />
     <ClCompile Include="src\Renderer\Camera.cpp" />
+    <ClCompile Include="src\Core\InputManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Renderer\ShaderProgram.h" />
@@ -14,5 +15,6 @@
     <ClInclude Include="src\Renderer\Texture.h" />
     <ClInclude Include="src\Core\Utils.h" />
     <ClInclude Include="src\Renderer\Camera.h" />
+    <ClInclude Include="src\Core\InputManager.h" />
   </ItemGroup>
 </Project>

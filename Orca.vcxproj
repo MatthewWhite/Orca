@@ -67,6 +67,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="libs\glad\src\glad.c" />
+    <ClCompile Include="src\Core\InputManager.cpp" />
     <ClCompile Include="src\Core\Utils.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Renderer\Camera.cpp" />
@@ -75,6 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="libs\stb\stb_image.h" />
+    <ClInclude Include="src\Core\InputManager.h" />
     <ClInclude Include="src\Core\Utils.h" />
     <ClInclude Include="src\Renderer\Camera.h" />
     <ClInclude Include="src\Renderer\ShaderProgram.h" />

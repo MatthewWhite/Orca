@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Core/InputManager.h"
 #include "Renderer/Camera.h"
 #include "Renderer/ShaderProgram.h"
 #include "Renderer/Texture.h"
@@ -109,6 +110,8 @@ int main(int argc, char** argv)
 	// subsystem initialization
 	// --------------------------------------------------------------------------
 	Texture::InitTextureLoader();
+	InputManager* pInputManager = InputManager::GetInstance();
+	pInputManager->SetContext(pWindow);
 
 	// compile and link shaders
 	// --------------------------------------------------------------------------
@@ -212,10 +215,11 @@ int main(int argc, char** argv)
 
 		// update
 		// ----------------------------------------------------------------------
+		camera.Update(deltaTime);
 		transform = glm::rotate(transform, glm::radians(rotationSpeed) * deltaTime, glm::vec3(1.0f, 1.0f, 1.0f));
+
 		const glm::mat4& projectionMatrix = camera.GetProjectionMatrix();
 		const glm::mat4& viewMatrix = camera.GetViewMatrix();
-
 		const glm::vec3 lightPos(lightTransform[3]);
 
 		// render
