@@ -29,6 +29,7 @@ Camera::Camera(int width, int height, float fov, float near, float far)
 	, mFov(fov)
 	, mNearDistance(near)
 	, mFarDistance(far)
+	, mMovementSpeed(1.0f)
 	, mbDirty(false)
 {
 	// glm calculates the projection matrix using vertical field of view, but I find horizontal more intuitive from a player's perspective
@@ -71,7 +72,7 @@ void Camera::Update(float deltaTime)
 
 	if (glm::length2(movementDirection) > 0.0f)
 	{
-		Translate(deltaTime * glm::normalize(movementDirection));
+		Translate(deltaTime * mMovementSpeed * glm::normalize(movementDirection));
 	}
 }
 

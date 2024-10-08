@@ -28,6 +28,9 @@ public:
 	float GetNearPlaneDistance() const { return mNearDistance; }
 	float GetFarPlaneDistance() const { return mFarDistance; }
 
+	float GetMovementSpeed() const { return mMovementSpeed; }
+	void SetMovementSpeed(float speed) { mMovementSpeed = speed; }
+
 private:
 	glm::mat4 mProjectionMatrix;
 	glm::mat4 mViewMatrix;
@@ -42,6 +45,8 @@ private:
 	float mFov;
 	float mNearDistance;
 	float mFarDistance;
+
+	float mMovementSpeed;
 
 	bool mbDirty;
 };

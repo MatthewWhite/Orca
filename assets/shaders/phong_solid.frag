@@ -2,7 +2,6 @@
 
 in vec3 v_fragPos;
 in vec3 v_normal;
-in vec2 v_uv1;
 
 uniform vec3 viewPos;
 
@@ -10,9 +9,9 @@ uniform vec3 lightPosition;
 uniform vec3 lightColor;
 uniform float ambientStrength;
 uniform float smoothness;
+uniform float specularIntensity;
 
-uniform sampler2D diffuseMap;
-uniform sampler2D specularMap;
+uniform vec3 color;
 
 out vec4 fragColor;
 
@@ -24,13 +23,10 @@ void main()
 	vec3 halfwayDir = normalize(viewDir + lightDir);
 
 	float diffuseStrength  = max(dot(normal, lightDir), 0.0);
-	float specularStrength = texture(specularMap, v_uv1).x;
 
-	vec3 diffuseSample = vec3(texture(diffuseMap, v_uv1));
-
-	vec3 ambient  = lightColor * ambientStrength * diffuseSample;
-	vec3 diffuse  = lightColor * diffuseStrength * diffuseSample;
-	vec3 specular = lightColor * specularStrength * pow(max(dot(normal, halfwayDir), 0.0), smoothness);
+	vec3 ambient  = lightColor * ambientStrength * color;
+	vec3 diffuse  = lightColor * diffuseStrength * color;
+	vec3 specular = lightColor * specularIntensity * pow(max(dot(normal, halfwayDir), 0.0), smoothness);
 
 	fragColor = vec4(diffuse + specular + ambient, 1.0);
 }

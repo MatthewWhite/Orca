@@ -118,6 +118,7 @@ int main(int argc, char** argv)
 	ShaderProgram standardShader("assets/shaders/standard.vert", "assets/shaders/standard.frag");
 	ShaderProgram blendedShader("assets/shaders/blended_textures.vert", "assets/shaders/blended_textures.frag");
 	ShaderProgram solidShader("assets/shaders/solid_color.vert", "assets/shaders/solid_color.frag");
+	ShaderProgram phongShader("assets/shaders/phong_solid.vert", "assets/shaders/phong_solid.frag");
 
 	// set up vertex data and attributes
 	// --------------------------------------------------------------------------
@@ -149,11 +150,14 @@ int main(int argc, char** argv)
 	// --------------------------------------------------------------------------
 	Texture texture1("assets/textures/container.jpg");
 	Texture texture2("assets/textures/awesomeface.png");
+	Texture diffuse("assets/textures/container2_d.png");
+	Texture specular("assets/textures/container2_s.png");
 	blendedShader.Bind();
 	blendedShader.SetUniform("texture1", 0);
 	blendedShader.SetUniform("texture2", 1);
 	standardShader.Bind();
-	standardShader.SetUniform("texture1", 0);
+	standardShader.SetUniform("diffuseMap", 0);
+	standardShader.SetUniform("specularMap", 1);
 
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
@@ -168,8 +172,9 @@ int main(int argc, char** argv)
 	const float nearPlane = 0.1f;
 	const float farPlane = 1000.0f;
 	Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT, fov, nearPlane, farPlane);
-	camera.SetPosition(glm::vec3(0.0f, 0.0f, -3.0f));
+	camera.SetPosition(glm::vec3(0.0f, 0.0f, 3.0f));
 	camera.LookAt(glm::vec3(0.0f));
+	camera.SetMovementSpeed(2.0f);
 
 	// cube transforms
 	// --------------------------------------------------------------------------
@@ -177,11 +182,18 @@ int main(int argc, char** argv)
 	transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, 0.0f));
 
 	glm::mat4 containerTransform = glm::mat4(1.0f);
-	containerTransform = glm::translate(containerTransform, glm::vec3(-1.5f, 0.3f, 2.0f));
+	containerTransform = glm::translate(containerTransform, glm::vec3(1.5f, 0.3f, -2.0f));
 	containerTransform = glm::rotate(containerTransform, glm::radians(60.0f), glm::vec3(1.0f, 0.3f, 0.5f));
 
+	//glm::mat4 solidBoxTransform = glm::mat4(1.0f);
+	//solidBoxTransform = glm::translate(solidBoxTransform, glm::vec3(-1.3f, 0.0f, -1.5f));
+	float rotationAngle = 0.0f;
+	float degreesPerSecond = 45.0f;
+	glm::vec3 offset(-1.7f, 0.0f, 0.0f);
+	glm::vec3 solidBoxRotationPoint(-2.2f, -1.7f, -0.7f);
+
 	glm::mat4 lightTransform = glm::mat4(1.0f);
-	lightTransform = glm::translate(lightTransform, glm::vec3(2.2f, 1.3f, 0.7f));
+	lightTransform = glm::translate(lightTransform, glm::vec3(-2.2f, 1.3f, -0.7f));
 	lightTransform = glm::scale(lightTransform, glm::vec3(0.25f));
 
 	// lighting data
@@ -192,9 +204,18 @@ int main(int argc, char** argv)
 	blendedShader.Bind();
 	blendedShader.SetUniform("lightColor", lightColor);
 	blendedShader.SetUniform("ambientStrength", ambientStrength);
+	blendedShader.SetUniform("smoothness", 4.0f);
+	blendedShader.SetUniform("specularIntensity", 0.1f);
 	standardShader.Bind();
 	standardShader.SetUniform("lightColor", lightColor);
 	standardShader.SetUniform("ambientStrength", ambientStrength);
+	standardShader.SetUniform("smoothness", 128.0f);
+	phongShader.Bind();
+	phongShader.SetUniform("lightColor", lightColor);
+	phongShader.SetUniform("color", glm::vec3(1.0f, 0.36f, 0.22f));
+	phongShader.SetUniform("ambientStrength", ambientStrength);
+	phongShader.SetUniform("smoothness", 64.0f);
+	phongShader.SetUniform("specularIntensity", 0.5f);
 	solidShader.Bind();
 	solidShader.SetUniform("color", lightColor);
 
@@ -208,6 +229,7 @@ int main(int argc, char** argv)
 		previousTime = currentTime;
 		currentTime = glfwGetTime();
 		deltaTime = currentTime - previousTime;
+		printf("FPS: %-10.1f\r", 1.0f / deltaTime);
 
 		// input
 		// ----------------------------------------------------------------------
@@ -217,6 +239,14 @@ int main(int argc, char** argv)
 		// ----------------------------------------------------------------------
 		camera.Update(deltaTime);
 		transform = glm::rotate(transform, glm::radians(rotationSpeed) * deltaTime, glm::vec3(1.0f, 1.0f, 1.0f));
+
+		rotationAngle += degreesPerSecond * deltaTime;
+		glm::mat4 solidBoxTransform(1.0f);
+		solidBoxTransform = glm::translate(solidBoxTransform, glm::vec3(-1.0f, -1.0f, 1.5f));
+		//solidBoxTransform = glm::translate(solidBoxTransform, solidBoxRotationPoint);
+		//solidBoxTransform = glm::rotate(solidBoxTransform, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+		//solidBoxTransform = glm::translate(solidBoxTransform, offset);
+		//solidBoxTransform = glm::rotate(solidBoxTransform, glm::radians(rotationAngle * 2), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		const glm::mat4& projectionMatrix = camera.GetProjectionMatrix();
 		const glm::mat4& viewMatrix = camera.GetViewMatrix();
@@ -234,6 +264,7 @@ int main(int argc, char** argv)
 
 		// bind our matrices
 		blendedShader.Bind();
+		blendedShader.SetUniform("viewPos", camera.GetPosition());
 		blendedShader.SetUniform("model", transform);
 		blendedShader.SetUniform("view", viewMatrix);
 		blendedShader.SetUniform("projection", projectionMatrix);
@@ -244,15 +275,26 @@ int main(int argc, char** argv)
 		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
 
 		// repeat for container
-		// for completeness sake we'll rebind texture unit 0 here since in a real scene we would likely want to do that
 		glActiveTexture(GL_TEXTURE0);
-		texture1.Bind();
+		diffuse.Bind();
+		glActiveTexture(GL_TEXTURE1);
+		specular.Bind();
 
 		standardShader.Bind();
+		standardShader.SetUniform("viewPos", camera.GetPosition());
 		standardShader.SetUniform("model", containerTransform);
 		standardShader.SetUniform("view", viewMatrix);
 		standardShader.SetUniform("projection", projectionMatrix);
 		standardShader.SetUniform("lightPosition", lightPos);
+		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
+
+		// repeat for phong cube
+		phongShader.Bind();
+		phongShader.SetUniform("viewPos", camera.GetPosition());
+		phongShader.SetUniform("model", solidBoxTransform);
+		phongShader.SetUniform("view", viewMatrix);
+		phongShader.SetUniform("projection", projectionMatrix);
+		phongShader.SetUniform("lightPosition", lightPos);
 		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
 
 		// repeat for light
