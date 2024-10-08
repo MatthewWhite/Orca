@@ -178,12 +178,12 @@ int main(int argc, char** argv)
 
 	// cube transforms
 	// --------------------------------------------------------------------------
-	glm::mat4 transform = glm::mat4(1.0f);
-	transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, 0.0f));
-
 	glm::mat4 containerTransform = glm::mat4(1.0f);
-	containerTransform = glm::translate(containerTransform, glm::vec3(1.5f, 0.3f, -2.0f));
-	containerTransform = glm::rotate(containerTransform, glm::radians(60.0f), glm::vec3(1.0f, 0.3f, 0.5f));
+	containerTransform = glm::translate(containerTransform, glm::vec3(0.0f, 0.0f, 0.0f));
+
+	glm::mat4 transform = glm::mat4(1.0f);
+	transform = glm::translate(transform, glm::vec3(1.5f, 0.3f, -2.0f));
+	transform = glm::rotate(transform, glm::radians(60.0f), glm::vec3(1.0f, 0.3f, 0.5f));
 
 	//glm::mat4 solidBoxTransform = glm::mat4(1.0f);
 	//solidBoxTransform = glm::translate(solidBoxTransform, glm::vec3(-1.3f, 0.0f, -1.5f));
@@ -199,13 +199,13 @@ int main(int argc, char** argv)
 	// lighting data
 	// --------------------------------------------------------------------------
 	glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-	float ambientStrength = 0.2f;
+	float ambientStrength = 0.025f;
 
 	blendedShader.Bind();
 	blendedShader.SetUniform("lightColor", lightColor);
 	blendedShader.SetUniform("ambientStrength", ambientStrength);
-	blendedShader.SetUniform("smoothness", 4.0f);
-	blendedShader.SetUniform("specularIntensity", 0.1f);
+	blendedShader.SetUniform("smoothness", 2.0f);
+	blendedShader.SetUniform("specularIntensity", 0.0f);
 	standardShader.Bind();
 	standardShader.SetUniform("lightColor", lightColor);
 	standardShader.SetUniform("ambientStrength", ambientStrength);
@@ -215,7 +215,7 @@ int main(int argc, char** argv)
 	phongShader.SetUniform("color", glm::vec3(1.0f, 0.36f, 0.22f));
 	phongShader.SetUniform("ambientStrength", ambientStrength);
 	phongShader.SetUniform("smoothness", 64.0f);
-	phongShader.SetUniform("specularIntensity", 0.5f);
+	phongShader.SetUniform("specularIntensity", 0.125f);
 	solidShader.Bind();
 	solidShader.SetUniform("color", lightColor);
 
@@ -229,7 +229,7 @@ int main(int argc, char** argv)
 		previousTime = currentTime;
 		currentTime = glfwGetTime();
 		deltaTime = currentTime - previousTime;
-		printf("FPS: %-10.1f\r", 1.0f / deltaTime);
+		printf("Frame time: %2.2fms (%.1f fps)\r", deltaTime * 1000.0f, 1.0f / deltaTime);
 
 		// input
 		// ----------------------------------------------------------------------
@@ -238,7 +238,7 @@ int main(int argc, char** argv)
 		// update
 		// ----------------------------------------------------------------------
 		camera.Update(deltaTime);
-		transform = glm::rotate(transform, glm::radians(rotationSpeed) * deltaTime, glm::vec3(1.0f, 1.0f, 1.0f));
+		containerTransform = glm::rotate(containerTransform, glm::radians(rotationSpeed) * deltaTime, glm::vec3(1.0f, 1.0f, 1.0f));
 
 		rotationAngle += degreesPerSecond * deltaTime;
 		glm::mat4 solidBoxTransform(1.0f);

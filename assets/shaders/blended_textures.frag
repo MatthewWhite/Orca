@@ -19,6 +19,8 @@ out vec4 fragColor;
 
 void main()
 {
+	float gamma = 2.2;
+
 	vec3 normal     = normalize(v_normal);
 	vec3 viewDir    = normalize(viewPos - v_fragPos);
 	vec3 lightDir   = normalize(lightPosition - v_fragPos);
@@ -35,4 +37,5 @@ void main()
 	vec3 specular = lightColor * specularIntensity * pow(max(dot(normal, halfwayDir), 0.0), smoothness);
 
 	fragColor = vec4(diffuse + specular + ambient, 1.0);
+	fragColor.rgb = pow(fragColor.rgb, vec3(1.0/gamma));
 }

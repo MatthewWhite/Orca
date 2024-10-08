@@ -36,12 +36,27 @@ Texture::Texture(const std::string& filename)
 		printf("Failed to load texture \"%s\"\n", filename.c_str());
 		return;
 	}
-	GLenum format = numChannels == 3 ? GL_RGB : GL_RGBA;
+
+	size_t nameEndPos = filename.find_last_of(".");
+	const bool bGammaCorrect = filename[nameEndPos - 2] != '_' || filename[nameEndPos - 1] == 'd';
+
+	GLenum format = GL_RGBA;
+	GLenum internalFormat = format;
+	if (numChannels == 3)
+	{
+		format = GL_RGB;
+		internalFormat = bGammaCorrect ? GL_SRGB : format;
+	}
+	else
+	{
+		if (bGammaCorrect)
+			internalFormat = GL_SRGB_ALPHA;
+	}
 
 	glGenTextures(1, &mId);
 	Bind();
 
-	glTexImage2D(GL_TEXTURE_2D, 0, format, mWidth, mHeight, 0, format, GL_UNSIGNED_BYTE, (void*)pTextureData);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, mWidth, mHeight, 0, format, GL_UNSIGNED_BYTE, (void*)pTextureData);
 
 	SetWrapMode(WrapMode::WM_REPEAT);
 	glGenerateMipmap(GL_TEXTURE_2D);
