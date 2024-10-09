@@ -52,6 +52,7 @@ void Camera::Update(float deltaTime)
 	}
 
 	glm::vec3 movementDirection(0.0f);
+	float speed = mMovementSpeed;
 
 	if (pInputManager->GetKeyState(Key::KEY_A))
 	{
@@ -69,10 +70,27 @@ void Camera::Update(float deltaTime)
 	{
 		movementDirection -= mForward;
 	}
+	if (pInputManager->GetKeyState(Key::KEY_SPACE))
+	{
+		movementDirection += mUp;
+	}
+	if (pInputManager->GetKeyState(Key::KEY_LALT))
+	{
+		movementDirection -= mUp;
+	}
+
+	if (pInputManager->GetKeyState(Key::KEY_LSHIFT))
+	{
+		speed += 2.0f;
+	}
+	if (pInputManager->GetKeyState(Key::KEY_LCTRL))
+	{
+		speed -= 0.9f;
+	}
 
 	if (glm::length2(movementDirection) > 0.0f)
 	{
-		Translate(deltaTime * mMovementSpeed * glm::normalize(movementDirection));
+		Translate(deltaTime * speed * glm::normalize(movementDirection));
 	}
 }
 

@@ -5,10 +5,16 @@ struct GLFWwindow;
 
 enum Key
 {
+	KEY_SPACE,
 	KEY_W,
 	KEY_A,
 	KEY_S,
 	KEY_D,
+	KEY_Q,
+	KEY_Z,
+	KEY_LSHIFT,
+	KEY_LCTRL,
+	KEY_LALT,
 	// TODO: expand this as new keys are needed...
 };
 
