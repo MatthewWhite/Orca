@@ -2,7 +2,7 @@
 #define CAMERA_H
 
 #include <glm/mat4x4.hpp>
-#include <glm/vec3.hpp>
+#include <glm/glm.hpp>
 
 class Camera
 {
@@ -40,15 +40,21 @@ private:
 	glm::vec3 mUp;
 	glm::vec3 mForward;
 
+	glm::vec2 mLastFrameMousePos;
+
 	int mWidth;
 	int mHeight;
 	float mFov;
 	float mNearDistance;
 	float mFarDistance;
+	float mYaw;
+	float mPitch;
 
 	float mMovementSpeed;
+	float mLookSensitivity;
 
 	bool mbDirty;
+	bool mbFreeLookEnabled;
 };
 
 #endif

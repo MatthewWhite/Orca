@@ -3,7 +3,6 @@
 #include <cstdio>
 
 #include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/norm.hpp>
 
@@ -15,6 +14,9 @@ namespace
 	const glm::vec3 WORLD_RIGHT(1.0f, 0.0f, 0.0f);
 	const glm::vec3 WORLD_UP(0.0f, 1.0f, 0.0f);
 	const glm::vec3 WORLD_FORWARD(0.0f, 0.0f, 1.0f);
+
+	const float MAX_PITCH = glm::radians(89.0f);
+	const float MIN_PITCH = glm::radians(-89.0f);
 }
 
 Camera::Camera(int width, int height, float fov, float near, float far)
@@ -24,13 +26,18 @@ Camera::Camera(int width, int height, float fov, float near, float far)
 	, mRight(WORLD_RIGHT)
 	, mUp(WORLD_UP)
 	, mForward(WORLD_FORWARD)
+	, mLastFrameMousePos(0.0f, 0.0f)
 	, mWidth(width)
 	, mHeight(height)
 	, mFov(fov)
 	, mNearDistance(near)
 	, mFarDistance(far)
+	, mYaw(0.0f)
+	, mPitch(0.0f)
 	, mMovementSpeed(1.0f)
+	, mLookSensitivity(0.005f)
 	, mbDirty(false)
+	, mbFreeLookEnabled(false)
 {
 	// glm calculates the projection matrix using vertical field of view, but I find horizontal more intuitive from a player's perspective
 	float aspectRatio = (float)mWidth / (float)mHeight;
@@ -45,45 +52,48 @@ Camera::~Camera()
 
 void Camera::Update(float deltaTime)
 {
-	const InputManager* const pInputManager = InputManager::GetInstance();
+	InputManager* pInputManager = InputManager::GetInstance();
 	if (!pInputManager)
 	{
 		return;
 	}
 
+	// translate
+	// --------------------------------------------------------------------------
 	glm::vec3 movementDirection(0.0f);
+	glm::vec3 planeLockedForward = glm::cross(WORLD_UP, mRight);
 	float speed = mMovementSpeed;
 
-	if (pInputManager->GetKeyState(Key::KEY_A))
+	if (pInputManager->GetKeyState(Key::KEY_A) == KeyState::KS_DOWN)
 	{
 		movementDirection -= mRight;
 	}
-	if (pInputManager->GetKeyState(Key::KEY_D))
+	if (pInputManager->GetKeyState(Key::KEY_D) == KeyState::KS_DOWN)
 	{
 		movementDirection += mRight;
 	}
-	if (pInputManager->GetKeyState(Key::KEY_W))
+	if (pInputManager->GetKeyState(Key::KEY_W) == KeyState::KS_DOWN)
 	{
-		movementDirection += mForward;
+		movementDirection += planeLockedForward;
 	}
-	if (pInputManager->GetKeyState(Key::KEY_S))
+	if (pInputManager->GetKeyState(Key::KEY_S) == KeyState::KS_DOWN)
 	{
-		movementDirection -= mForward;
+		movementDirection -= planeLockedForward;
 	}
-	if (pInputManager->GetKeyState(Key::KEY_SPACE))
+	if (pInputManager->GetKeyState(Key::KEY_SPACE) == KeyState::KS_DOWN)
 	{
-		movementDirection += mUp;
+		movementDirection += WORLD_UP;
 	}
-	if (pInputManager->GetKeyState(Key::KEY_LALT))
+	if (pInputManager->GetKeyState(Key::KEY_LALT) == KeyState::KS_DOWN)
 	{
-		movementDirection -= mUp;
+		movementDirection -= WORLD_UP;
 	}
 
-	if (pInputManager->GetKeyState(Key::KEY_LSHIFT))
+	if (pInputManager->GetKeyState(Key::KEY_LSHIFT) == KeyState::KS_DOWN)
 	{
 		speed += 2.0f;
 	}
-	if (pInputManager->GetKeyState(Key::KEY_LCTRL))
+	if (pInputManager->GetKeyState(Key::KEY_LCTRL) == KeyState::KS_DOWN)
 	{
 		speed -= 0.9f;
 	}
@@ -91,6 +101,43 @@ void Camera::Update(float deltaTime)
 	if (glm::length2(movementDirection) > 0.0f)
 	{
 		Translate(deltaTime * speed * glm::normalize(movementDirection));
+	}
+
+	// free look
+	// --------------------------------------------------------------------------
+	if (!mbFreeLookEnabled && pInputManager->GetMouseButtonState(MouseButton::MOUSE_BUTTON_MIDDLE) == MouseButtonState::MBS_DOWN)
+	{
+		pInputManager->DisableMouse();
+		mbFreeLookEnabled = true;
+		mLastFrameMousePos = pInputManager->GetMousePosition();
+	}
+	else if (mbFreeLookEnabled && pInputManager->GetMouseButtonState(MouseButton::MOUSE_BUTTON_MIDDLE) == MouseButtonState::MBS_UP)
+	{
+		pInputManager->EnableMouse();
+		mbFreeLookEnabled = false;
+	}
+
+	if (mbFreeLookEnabled)
+	{
+		glm::vec2 mousePos = pInputManager->GetMousePosition();
+		glm::vec2 delta = mousePos - mLastFrameMousePos;
+		delta *= mLookSensitivity;
+
+		mYaw += delta.x;
+		mPitch -= delta.y;
+
+		if (mPitch > MAX_PITCH)
+			mPitch = MAX_PITCH;
+		else if (mPitch < MIN_PITCH)
+			mPitch = MIN_PITCH;
+
+		glm::vec3 dir(0.0f);
+		dir.x = glm::cos(mYaw) * glm::cos(mPitch);
+		dir.y = glm::sin(mPitch);
+		dir.z = glm::sin(mYaw) * glm::cos(mPitch);
+		LookAt(mPosition + dir);
+
+		mLastFrameMousePos = mousePos;
 	}
 }
 
@@ -104,6 +151,10 @@ void Camera::LookAt(const glm::vec3& target)
 	mForward = glm::normalize(target - mPosition);
 	mRight = glm::cross(mForward, WORLD_UP);
 	mUp = glm::cross(mRight, mForward);
+
+	// recalculate yaw/pitch in case this is being called from outside of the normal freelook controls
+	mYaw = glm::atan(mForward.z, mForward.x);
+	mPitch = glm::asin(mForward.y);
 
 	mbDirty = true;
 }
