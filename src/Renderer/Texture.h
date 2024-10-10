@@ -31,8 +31,11 @@ public:
 		FM_INVALID
 	};
 
+	Texture();
 	Texture(const std::string& filename);
 	~Texture();
+
+	void Load(const std::string& filename);
 
 	void Bind();
 

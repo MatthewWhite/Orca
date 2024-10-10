@@ -8,6 +8,7 @@
     <ClCompile Include="src\Core\Utils.cpp" />
     <ClCompile Include="src\Renderer\Camera.cpp" />
     <ClCompile Include="src\Core\InputManager.cpp" />
+    <ClCompile Include="src\Renderer\Mesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Renderer\ShaderProgram.h" />
@@ -16,5 +17,6 @@
     <ClInclude Include="src\Core\Utils.h" />
     <ClInclude Include="src\Renderer\Camera.h" />
     <ClInclude Include="src\Core\InputManager.h" />
+    <ClInclude Include="src\Renderer\Mesh.h" />
   </ItemGroup>
 </Project>

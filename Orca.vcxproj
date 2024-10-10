@@ -71,6 +71,7 @@
     <ClCompile Include="src\Core\Utils.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Renderer\Camera.cpp" />
+    <ClCompile Include="src\Renderer\Mesh.cpp" />
     <ClCompile Include="src\Renderer\ShaderProgram.cpp" />
     <ClCompile Include="src\Renderer\Texture.cpp" />
   </ItemGroup>
@@ -79,6 +80,7 @@
     <ClInclude Include="src\Core\InputManager.h" />
     <ClInclude Include="src\Core\Utils.h" />
     <ClInclude Include="src\Renderer\Camera.h" />
+    <ClInclude Include="src\Renderer\Mesh.h" />
     <ClInclude Include="src\Renderer\ShaderProgram.h" />
     <ClInclude Include="src\Renderer\Texture.h" />
   </ItemGroup>

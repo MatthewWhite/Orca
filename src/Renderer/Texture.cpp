@@ -20,6 +20,18 @@ void Texture::InitTextureLoader()
 	stbi_set_flip_vertically_on_load(true);
 }
 
+Texture::Texture()
+	: mId(0)
+	, mWrapModeU(WrapMode::WM_INVALID)
+	, mWrapModeV(WrapMode::WM_INVALID)
+	, mFilterModeMin(FilterMode::FM_INVALID)
+	, mFilterModeMag(FilterMode::FM_INVALID)
+	, mWidth(0)
+	, mHeight(0)
+{
+
+}
+
 Texture::Texture(const std::string& filename)
 	: mId(0)
 	, mWrapModeU(WrapMode::WM_INVALID)
@@ -28,6 +40,11 @@ Texture::Texture(const std::string& filename)
 	, mFilterModeMag(FilterMode::FM_INVALID)
 	, mWidth(0)
 	, mHeight(0)
+{
+	Load(filename);
+}
+
+void Texture::Load(const std::string& filename)
 {
 	int numChannels;
 	unsigned char* pTextureData = stbi_load(filename.c_str(), &mWidth, &mHeight, &numChannels, 0);

@@ -9,6 +9,7 @@
 
 #include "Core/InputManager.h"
 #include "Renderer/Camera.h"
+#include "Renderer/Mesh.h"
 #include "Renderer/ShaderProgram.h"
 #include "Renderer/Texture.h"
 
@@ -122,6 +123,9 @@ int main(int argc, char** argv)
 
 	// set up vertex data and attributes
 	// --------------------------------------------------------------------------
+	Mesh cubeMesh;
+	cubeMesh.Load("assets/models/cube.obj");
+
 	GLuint vao, vbo, ebo;
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &vbo);
