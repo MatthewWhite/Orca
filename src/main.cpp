@@ -299,9 +299,11 @@ int main(int argc, char** argv)
 		phongShader.SetUniform("view", viewMatrix);
 		phongShader.SetUniform("projection", projectionMatrix);
 		phongShader.SetUniform("lightPosition", lightPos);
-		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
+		cubeMesh.Draw();
+		//glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
 
 		// repeat for light
+		glBindVertexArray(vao);
 		solidShader.Bind();
 		solidShader.SetUniform("model", lightTransform);
 		solidShader.SetUniform("view", viewMatrix);
