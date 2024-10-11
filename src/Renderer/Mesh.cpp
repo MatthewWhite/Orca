@@ -85,7 +85,7 @@ bool Mesh::LoadWavefrontObj(const std::string& filename)
 
 	struct Face
 	{
-		uint32_t v, vn, vt;
+		int32_t v, vn, vt;
 		bool operator<(const Face& f) const
 		{
 			if (v != f.v) { return v < f.v; }
@@ -140,30 +140,95 @@ bool Mesh::LoadWavefrontObj(const std::string& filename)
 		}
 		else if (buff[0] == 'f')
 		{
-			size_t offset = 2;
-			for (int i = 0; i < 3; ++i)
-			{
-				Face f;
-				int read;
-				sscanf(buff + offset, "%" PRIu32 "/%" PRIu32 "/%" PRIu32 "%n", &f.v, &f.vt, &f.vn, &read);
-				offset += read;
+			Face faces[4];
+			int numFaces = 0;
 
-				--f.v;
-				--f.vn;
-				--f.vt;
+			size_t offset = 2;
+			for (; numFaces < 4; ++numFaces)
+			{
+				Face& f = faces[numFaces];
+				int charsRead = 0;
+				if (sscanf(buff + offset, "%" PRIi32 "%n", &f.v, &charsRead) == 1)
+				{
+					offset += charsRead;
+					f.v = (f.v > 0) ? f.v - 1 : positions.size() + f.v;
+
+					if (buff[offset] == '/')
+					{
+						++offset;
+						if (sscanf(buff + offset, "%" PRIi32 "%n", &f.vt, &charsRead) == 0)
+						{
+							// no texture coordinates
+							f.vt = -1;
+						}
+						f.vt = (f.vt > 0) ? f.vt - 1 : texCoords.size() + f.vt;
+
+						offset += charsRead;
+						if (buff[offset] == '/')
+						{
+							++offset;
+							sscanf(buff + offset, "%" PRIi32 "%n", &f.vn, &charsRead);
+							offset += charsRead;
+							f.vn = (f.vn > 0) ? f.vn - 1 : normals.size() + f.vn;
+						}
+						else
+						{
+							f.vn = -1;
+						}
+					}
+					else
+					{
+						// position-only faces
+						f.vn = -1;
+						f.vt = -1;
+					}
+				}
+				else
+				{
+					break;
+				}
+
+				/*int read;
+				if (sscanf(buff + offset, "%" PRIi32 "/%" PRIi32 "/%" PRIi32 "%n", &f.v, &f.vt, &f.vn, &read) == 0)
+				{
+					break;
+				}
+				offset += read;*/
+
+				//if (f.v > 0)
+				//{
+				//	--f.v;
+				//	--f.vn;
+				//	--f.vt;
+				//}
+				//else
+				//{
+				//	f.v = positions.size() + f.v;
+				//	f.vn = normals.size() + f.vn;
+				//	f.vt = texCoords.size() + f.vt;
+				//}
 
 				unsigned int index = GetFaceIndex(f);
 				mIndices.push_back(index);
 
 				if (index >= mVertices.size())
 				{
+					glm::vec3 normal = f.vn >= 0 ? normals[f.vn] : glm::vec3(0.0f);
+					glm::vec2 texCoord = f.vt >= 0 ? texCoords[f.vt] : glm::vec2(0.0f);
+
 					Vertex v = {
 						positions[f.v],
-						normals[f.vn],
-						texCoords[f.vt]
+						normal,
+						texCoord
 					};
 					mVertices.push_back(v);
 				}
+			}
+
+			if (numFaces == 4)
+			{
+				mIndices.push_back(GetFaceIndex(faces[0]));
+				mIndices.push_back(GetFaceIndex(faces[2]));
 			}
 		}
 		else if (strncmp(buff, "mtllib", 6) == 0)

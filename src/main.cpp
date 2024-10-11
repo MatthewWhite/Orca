@@ -124,7 +124,7 @@ int main(int argc, char** argv)
 	// set up vertex data and attributes
 	// --------------------------------------------------------------------------
 	Mesh cubeMesh;
-	cubeMesh.Load("assets/models/cube.obj");
+	cubeMesh.Load("assets/models/teapot.obj");
 
 	GLuint vao, vbo, ebo;
 	glGenVertexArrays(1, &vao);
