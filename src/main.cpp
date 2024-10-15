@@ -126,10 +126,14 @@ int main(int argc, char** argv)
 	Mesh backpackMesh;
 	{
 		auto start = glfwGetTime();
-		backpackMesh.Load("assets/models/backpack/backpack.obj", true);
+		backpackMesh.Load("assets/models/sponza/sponza.obj", true);
 		auto end = glfwGetTime();
 		printf("Loading model (new) took %fms\n", (end - start) * 1000.0f);
 	}
+
+	// sample model loading
+	// Model backpack;
+	// backpack.load("assets/models/backpack/backpack.obj");
 
 	GLuint vao, vbo, ebo;
 	glGenVertexArrays(1, &vao);
@@ -276,7 +280,7 @@ int main(int argc, char** argv)
 
 		// do the actual rendering
 		glBindVertexArray(vao);
-		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
+		//glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
 
 		// repeat for container
 		glActiveTexture(GL_TEXTURE0);
@@ -290,7 +294,7 @@ int main(int argc, char** argv)
 		standardShader.SetUniform("view", viewMatrix);
 		standardShader.SetUniform("projection", projectionMatrix);
 		standardShader.SetUniform("lightPosition", lightPos);
-		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
+		//glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
 
 		// repeat for backpack
 		phongShader.Bind();

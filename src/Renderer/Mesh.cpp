@@ -38,6 +38,7 @@ bool Mesh::Load(const std::string& filename, bool bUseNew)
 		std::sort(parser.indexedVertices.begin(), parser.indexedVertices.end());
 		size_t indexCount = parser.indexedVertices.size();
 		mIndices.resize(indexCount);
+		printf("%i triangles\n", indexCount / 3);
 
 		// convert obj data to a format our engine expects
 		uint32_t index = 0;

@@ -10,6 +10,7 @@
     <ClCompile Include="src\Core\InputManager.cpp" />
     <ClCompile Include="src\Renderer\Mesh.cpp" />
     <ClCompile Include="src\Renderer\ObjParser.cpp" />
+    <ClCompile Include="src\Renderer\Model.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Renderer\ShaderProgram.h" />
@@ -20,5 +21,6 @@
     <ClInclude Include="src\Core\InputManager.h" />
     <ClInclude Include="src\Renderer\Mesh.h" />
     <ClInclude Include="src\Renderer\ObjParser.h" />
+    <ClInclude Include="src\Renderer\Model.h" />
   </ItemGroup>
 </Project>

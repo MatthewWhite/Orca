@@ -57,6 +57,15 @@ void ObjParser::Parse(const std::string& filename)
 		{
 			ParseFace(buff);
 		}
+		else if (buff[0] == 'u' &&
+				 buff[1] == 's' &&
+				 buff[2] == 'e' &&
+				 buff[3] == 'm' &&
+				 buff[4] == 't' &&
+				 buff[5] == 'l')
+		{
+			// TODO: swap which mesh we're parsing faces for
+		}
 	}
 
 	fclose(pFile);
@@ -94,7 +103,7 @@ void ObjParser::ParseFace(char* buffer)
 
 	uint32_t numTotalVerts = indexedVertices.size();
 
-	char* originalBuffer = buffer;
+	bool bFaceDefinesNormals = false;
 
 	buffer += 2;
 	while (p = (int32_t)strtol(buffer, &buffer, 10))
@@ -107,6 +116,7 @@ void ObjParser::ParseFace(char* buffer)
 			{
 				++buffer;
 				n = (int32_t)strtol(buffer, &buffer, 10);
+				bFaceDefinesNormals = n;
 			}
 		}
 
@@ -124,8 +134,41 @@ void ObjParser::ParseFace(char* buffer)
 	if (vertCount > 3)
 	{
 		const IndexedVertex& f0 = indexedVertices[numTotalVerts];
+		indexedVertices.emplace_back(f0.p, f0.t, f0.n, numTotalVerts + vertCount++);
 		const IndexedVertex& f2 = indexedVertices[numTotalVerts + 2];
-		indexedVertices.emplace_back(f0.p, f0.t, f0.n, numTotalVerts + vertCount + 1);
-		indexedVertices.emplace_back(f2.p, f2.t, f2.n, numTotalVerts + vertCount + 2);
+		indexedVertices.emplace_back(f2.p, f2.t, f2.n, numTotalVerts + vertCount++);
+	}
+
+	if (!bFaceDefinesNormals)
+	{
+		// no normals defined. have to generate them ourself
+		IndexedVertex* pV0 = &indexedVertices[numTotalVerts];
+		const IndexedVertex* pEnd = &indexedVertices[numTotalVerts + vertCount - 1];
+		int32_t normCount = normals.size();
+		while (pV0 < pEnd)
+		{
+			IndexedVertex* pV1 = pV0 + 1;
+			IndexedVertex* pV2 = pV1 + 1;
+
+			// positions of each vertex
+			const glm::vec3& pos0 = positions[pV0->p];
+			const glm::vec3& pos1 = positions[pV1->p];
+			const glm::vec3& pos2 = positions[pV2->p];
+
+			// vectors between each vertex
+			glm::vec3 vec01 = pos1 - pos0;
+			glm::vec3 vec02 = pos2 - pos0;
+			glm::vec3 vec12 = pos2 - pos1;
+
+			normals.push_back(glm::normalize(glm::cross(vec01, vec02)));
+			normals.push_back(glm::normalize(glm::cross(vec12, -vec02)));
+			normals.push_back(glm::normalize(glm::cross(-vec02, -vec12)));
+
+			pV0->n = normCount++;
+			pV1->n = normCount++;
+			pV2->n = normCount++;
+
+			pV0 += 3;
+		}
 	}
 }
