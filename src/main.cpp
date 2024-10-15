@@ -123,8 +123,13 @@ int main(int argc, char** argv)
 
 	// set up vertex data and attributes
 	// --------------------------------------------------------------------------
-	Mesh cubeMesh;
-	cubeMesh.Load("assets/models/teapot.obj");
+	Mesh backpackMesh;
+	{
+		auto start = glfwGetTime();
+		backpackMesh.Load("assets/models/backpack/backpack.obj", true);
+		auto end = glfwGetTime();
+		printf("Loading model (new) took %fms\n", (end - start) * 1000.0f);
+	}
 
 	GLuint vao, vbo, ebo;
 	glGenVertexArrays(1, &vao);
@@ -180,7 +185,7 @@ int main(int argc, char** argv)
 	camera.LookAt(glm::vec3(0.0f));
 	camera.SetMovementSpeed(2.0f);
 
-	// cube transforms
+	// transforms
 	// --------------------------------------------------------------------------
 	glm::mat4 containerTransform = glm::mat4(1.0f);
 	containerTransform = glm::translate(containerTransform, glm::vec3(0.0f, 0.0f, 0.0f));
@@ -189,8 +194,11 @@ int main(int argc, char** argv)
 	transform = glm::translate(transform, glm::vec3(1.5f, 0.3f, -2.0f));
 	transform = glm::rotate(transform, glm::radians(60.0f), glm::vec3(1.0f, 0.3f, 0.5f));
 
-	//glm::mat4 solidBoxTransform = glm::mat4(1.0f);
-	//solidBoxTransform = glm::translate(solidBoxTransform, glm::vec3(-1.3f, 0.0f, -1.5f));
+	glm::mat4 backpackTransform(1.0f);
+	backpackTransform = glm::translate(backpackTransform, glm::vec3(-1.0f, -1.0f, -1.5f));
+
+	//glm::mat4 backpackTransform = glm::mat4(1.0f);
+	//backpackTransform = glm::translate(backpackTransform, glm::vec3(-1.3f, 0.0f, -1.5f));
 	float rotationAngle = 0.0f;
 	float degreesPerSecond = 45.0f;
 	glm::vec3 offset(-1.7f, 0.0f, 0.0f);
@@ -244,14 +252,6 @@ int main(int argc, char** argv)
 		camera.Update(deltaTime);
 		containerTransform = glm::rotate(containerTransform, glm::radians(rotationSpeed) * deltaTime, glm::vec3(1.0f, 1.0f, 1.0f));
 
-		rotationAngle += degreesPerSecond * deltaTime;
-		glm::mat4 solidBoxTransform(1.0f);
-		solidBoxTransform = glm::translate(solidBoxTransform, glm::vec3(-1.0f, -1.0f, 1.5f));
-		//solidBoxTransform = glm::translate(solidBoxTransform, solidBoxRotationPoint);
-		//solidBoxTransform = glm::rotate(solidBoxTransform, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-		//solidBoxTransform = glm::translate(solidBoxTransform, offset);
-		//solidBoxTransform = glm::rotate(solidBoxTransform, glm::radians(rotationAngle * 2), glm::vec3(0.0f, 1.0f, 0.0f));
-
 		const glm::mat4& projectionMatrix = camera.GetProjectionMatrix();
 		const glm::mat4& viewMatrix = camera.GetViewMatrix();
 		const glm::vec3 lightPos(lightTransform[3]);
@@ -292,15 +292,14 @@ int main(int argc, char** argv)
 		standardShader.SetUniform("lightPosition", lightPos);
 		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
 
-		// repeat for phong cube
+		// repeat for backpack
 		phongShader.Bind();
 		phongShader.SetUniform("viewPos", camera.GetPosition());
-		phongShader.SetUniform("model", solidBoxTransform);
+		phongShader.SetUniform("model", backpackTransform);
 		phongShader.SetUniform("view", viewMatrix);
 		phongShader.SetUniform("projection", projectionMatrix);
 		phongShader.SetUniform("lightPosition", lightPos);
-		cubeMesh.Draw();
-		//glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
+		backpackMesh.Draw();
 
 		// repeat for light
 		glBindVertexArray(vao);
