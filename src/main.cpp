@@ -126,7 +126,7 @@ int main(int argc, char** argv)
 	Mesh backpackMesh;
 	{
 		auto start = glfwGetTime();
-		backpackMesh.Load("assets/models/sponza/sponza.obj", true);
+		backpackMesh.Load("assets/models/backpack/backpack.obj", true);
 		auto end = glfwGetTime();
 		printf("Loading model (new) took %fms\n", (end - start) * 1000.0f);
 	}
@@ -185,8 +185,8 @@ int main(int argc, char** argv)
 	const float nearPlane = 0.1f;
 	const float farPlane = 1000.0f;
 	Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT, fov, nearPlane, farPlane);
-	camera.SetPosition(glm::vec3(0.0f, 0.0f, 3.0f));
-	camera.LookAt(glm::vec3(0.0f));
+	camera.SetPosition(glm::vec3(10.0f, 1.0f, 0.0f));
+	camera.LookAt(glm::vec3(-1.0f, 1.0f, 0.0f));
 	camera.SetMovementSpeed(2.0f);
 
 	// transforms
@@ -297,13 +297,13 @@ int main(int argc, char** argv)
 		//glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
 
 		// repeat for backpack
-		phongShader.Bind();
-		phongShader.SetUniform("viewPos", camera.GetPosition());
-		phongShader.SetUniform("model", backpackTransform);
-		phongShader.SetUniform("view", viewMatrix);
-		phongShader.SetUniform("projection", projectionMatrix);
-		phongShader.SetUniform("lightPosition", lightPos);
-		backpackMesh.Draw();
+		standardShader.Bind();
+		standardShader.SetUniform("viewPos", camera.GetPosition());
+		standardShader.SetUniform("model", backpackTransform);
+		standardShader.SetUniform("view", viewMatrix);
+		standardShader.SetUniform("projection", projectionMatrix);
+		standardShader.SetUniform("lightPosition", lightPos);
+		backpackMesh.Draw(standardShader);
 
 		// repeat for light
 		glBindVertexArray(vao);

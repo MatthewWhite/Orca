@@ -11,6 +11,7 @@
     <ClCompile Include="src\Renderer\Mesh.cpp" />
     <ClCompile Include="src\Renderer\ObjParser.cpp" />
     <ClCompile Include="src\Renderer\Model.cpp" />
+    <ClCompile Include="src\Renderer\Material.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Renderer\ShaderProgram.h" />
@@ -22,5 +23,6 @@
     <ClInclude Include="src\Renderer\Mesh.h" />
     <ClInclude Include="src\Renderer\ObjParser.h" />
     <ClInclude Include="src\Renderer\Model.h" />
+    <ClInclude Include="src\Renderer\Material.h" />
   </ItemGroup>
 </Project>

@@ -32,6 +32,11 @@ void main()
 	vec3 diffuse  = lightColor * diffuseStrength * c;
 	vec3 specular = lightColor * specularIntensity * pow(max(dot(normal, halfwayDir), 0.0), smoothness);
 
+	// float distance = length(lightPosition - v_fragPos);
+	// float attenuation = 1.0 / (distance * distance);
+	// diffuse *= attenuation;
+	// specular *= attenuation;
+
 	fragColor = vec4(diffuse + specular + ambient, 1.0);
 	fragColor.rgb = pow(fragColor.rgb, vec3(1.0/gamma));
 }

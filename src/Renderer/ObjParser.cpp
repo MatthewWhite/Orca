@@ -28,6 +28,9 @@ void ObjParser::Parse(const std::string& filename)
 	normals.emplace_back(0.0f, 0.0f, 1.0f);
 	texCoords.emplace_back(0.0f);
 
+	// TEMP
+	material.Load("assets/models/backpack/backpack.mtl");
+
 	char buff[256];
 	while (fgets(buff, sizeof(buff), pFile))
 	{

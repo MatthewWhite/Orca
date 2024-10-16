@@ -28,6 +28,7 @@ Texture::Texture()
 	, mFilterModeMag(FilterMode::FM_INVALID)
 	, mWidth(0)
 	, mHeight(0)
+	, mFilename("")
 {
 
 }
@@ -46,6 +47,8 @@ Texture::Texture(const std::string& filename)
 
 void Texture::Load(const std::string& filename)
 {
+	mFilename = filename;
+
 	int numChannels;
 	unsigned char* pTextureData = stbi_load(filename.c_str(), &mWidth, &mHeight, &numChannels, 0);
 	if (!pTextureData)

@@ -7,6 +7,8 @@
 
 #include <glm/glm.hpp>
 
+#include "Material.h"
+
 class ObjParser
 {
 public:
@@ -45,6 +47,7 @@ public:
 	std::vector<glm::vec3> normals;
 	std::vector<glm::vec2> texCoords;
 	std::vector<IndexedVertex> indexedVertices;
+	Material material;
 
 private:
 	void ParsePosition(char* buffer);

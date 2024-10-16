@@ -58,6 +58,8 @@ private:
 	int mWidth;
 	int mHeight;
 
+	std::string mFilename;
+
 	static textureId_t s_currentTexture;
 };
 

@@ -166,10 +166,10 @@ newmtl sp_00_svod
 	Kd 0.941177 0.866667 0.737255
 	Ks 0.034039 0.032314 0.029333
 	Ke 0.000000 0.000000 0.000000
-        map_Kd KAMEN-stup.JPG
-        map_Ka KAMEN-stup.JPG
-        map_bump KAMEN-stup.jpg
-        bump KAMEN-stup.jpg
+	map_Kd KAMEN-stup.JPG
+	map_Ka KAMEN-stup.JPG
+	map_bump KAMEN-stup.jpg
+	bump KAMEN-stup.jpg
 
 newmtl sp_02_reljef
 	Ns 50.000000

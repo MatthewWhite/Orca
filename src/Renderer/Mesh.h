@@ -6,7 +6,8 @@
 
 #include <glm/glm.hpp>
 
-#include "Texture.h"
+#include "Material.h"
+#include "ShaderProgram.h"
 
 class Mesh
 {
@@ -24,19 +25,12 @@ public:
 	~Mesh();
 
 	bool Load(const std::string& filename, bool bUseNew = false);
-	void Draw();
+	void Draw(ShaderProgram& shader);
 
 private:
-	bool LoadWavefrontObj(const std::string& filename);
-
-	glm::vec3 ParsePosition(char* buffer);
-	glm::vec3 ParseNormal(char* buffer);
-	glm::vec2 ParseTexCoord(char* buffer);
-	void ParseFace(char* buffer);
-
 	std::vector<Vertex> mVertices;
 	std::vector<unsigned int> mIndices;
-	Texture mDiffuse;
+	Material mMaterial;
 
 	unsigned int mVAO;
 	unsigned int mVBO;
