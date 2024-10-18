@@ -12,7 +12,7 @@ public:
 	Model();
 	~Model();
 
-	//void Load(const std::string& filename);
+	void Load(const std::string& filename);
 
 private:
 	std::vector<Mesh> mMeshes;

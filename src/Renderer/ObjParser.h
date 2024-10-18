@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -10,6 +11,15 @@
 class ObjParser
 {
 public:
+	struct ObjMeshData
+	{
+		std::vector<glm::vec3> positions;
+		std::vector<glm::vec3> normals;
+		std::vector<glm::vec2> texCoords;
+
+		std::vector<unsigned int> indices;
+	};
+
 	struct IndexedVertex
 	{
 		uint32_t p;
@@ -41,6 +51,8 @@ public:
 
 	void Parse(const std::string& filename);
 
+	std::vector<ObjMeshData> NewParse(const std::string& filename);
+
 	std::vector<glm::vec3> positions;
 	std::vector<glm::vec3> normals;
 	std::vector<glm::vec2> texCoords;
@@ -52,6 +64,12 @@ private:
 	void ParseTexCoord(char* buffer);
 
 	void ParseFace(char* buffer);
+
+	void ParseUsemtl(char* buffer);
+
+	std::unordered_map<std::string, std::vector<IndexedVertex>> m_meshVerticesMap;
+	std::vector<IndexedVertex>* m_pCurrentMeshVertices;
+	std::string m_currentMeshName;
 };
 
 #endif

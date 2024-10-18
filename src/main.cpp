@@ -10,6 +10,7 @@
 #include "Core/InputManager.h"
 #include "Renderer/Camera.h"
 #include "Renderer/Mesh.h"
+#include "Renderer/Model.h"
 #include "Renderer/ShaderProgram.h"
 #include "Renderer/Texture.h"
 
@@ -126,14 +127,19 @@ int main(int argc, char** argv)
 	Mesh backpackMesh;
 	{
 		auto start = glfwGetTime();
-		backpackMesh.Load("assets/models/sponza/sponza.obj", true);
+		backpackMesh.Load("assets/models/backpack/backpack.obj", true);
 		auto end = glfwGetTime();
-		printf("Loading model (new) took %fms\n", (end - start) * 1000.0f);
+		printf("Loading model (old) took %fms\n", (end - start) * 1000.0f);
 	}
 
 	// sample model loading
-	// Model backpack;
-	// backpack.load("assets/models/backpack/backpack.obj");
+	{
+		 Model backpack;
+		 auto start = glfwGetTime();
+		 backpack.Load("assets/models/backpack/backpack.obj");
+		 auto end = glfwGetTime();
+		 printf("Loading model (new) took %fms\n", (end - start) * 1000.0f);
+	}
 
 	GLuint vao, vbo, ebo;
 	glGenVertexArrays(1, &vao);
@@ -165,6 +171,8 @@ int main(int argc, char** argv)
 	Texture texture2("assets/textures/awesomeface.png");
 	Texture diffuse("assets/textures/container2_d.png");
 	Texture specular("assets/textures/container2_s.png");
+	Texture backpackDiffuse("assets/models/backpack/diffuse_d.jpg");
+	Texture backpackSpecular("assets/models/backpack/specular_s.jpg");
 	blendedShader.Bind();
 	blendedShader.SetUniform("texture1", 0);
 	blendedShader.SetUniform("texture2", 1);
@@ -185,8 +193,8 @@ int main(int argc, char** argv)
 	const float nearPlane = 0.1f;
 	const float farPlane = 1000.0f;
 	Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT, fov, nearPlane, farPlane);
-	camera.SetPosition(glm::vec3(0.0f, 0.0f, 3.0f));
-	camera.LookAt(glm::vec3(0.0f));
+	camera.SetPosition(glm::vec3(0.0f, 0.0f, -1.0f));
+	camera.LookAt(glm::vec3(-1.0f, 0.25f, -1.0f));
 	camera.SetMovementSpeed(2.0f);
 
 	// transforms
@@ -209,7 +217,7 @@ int main(int argc, char** argv)
 	glm::vec3 solidBoxRotationPoint(-2.2f, -1.7f, -0.7f);
 
 	glm::mat4 lightTransform = glm::mat4(1.0f);
-	lightTransform = glm::translate(lightTransform, glm::vec3(-2.2f, 1.3f, -0.7f));
+	lightTransform = glm::translate(lightTransform, glm::vec3(-3.0f, 1.3f, -0.7f));
 	lightTransform = glm::scale(lightTransform, glm::vec3(0.25f));
 
 	// lighting data
@@ -297,12 +305,16 @@ int main(int argc, char** argv)
 		//glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
 
 		// repeat for backpack
-		phongShader.Bind();
-		phongShader.SetUniform("viewPos", camera.GetPosition());
-		phongShader.SetUniform("model", backpackTransform);
-		phongShader.SetUniform("view", viewMatrix);
-		phongShader.SetUniform("projection", projectionMatrix);
-		phongShader.SetUniform("lightPosition", lightPos);
+		glActiveTexture(GL_TEXTURE0);
+		backpackDiffuse.Bind();
+		glActiveTexture(GL_TEXTURE1);
+		backpackSpecular.Bind();
+		standardShader.Bind();
+		standardShader.SetUniform("viewPos", camera.GetPosition());
+		standardShader.SetUniform("model", backpackTransform);
+		standardShader.SetUniform("view", viewMatrix);
+		standardShader.SetUniform("projection", projectionMatrix);
+		standardShader.SetUniform("lightPosition", lightPos);
 		backpackMesh.Draw();
 
 		// repeat for light
