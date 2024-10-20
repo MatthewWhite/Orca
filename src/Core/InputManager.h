@@ -14,6 +14,7 @@ enum Key
 	KEY_D,
 	KEY_Q,
 	KEY_Z,
+	KEY_ENTER,
 	KEY_LSHIFT,
 	KEY_LCTRL,
 	KEY_LALT,

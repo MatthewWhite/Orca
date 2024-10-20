@@ -10,6 +10,7 @@
 
 class Mesh
 {
+public:
 	struct Vertex
 	{
 		glm::vec3 position;
@@ -19,24 +20,17 @@ class Mesh
 		Vertex(glm::vec3 p, glm::vec3 n, glm::vec2 t) : position(p), normal(n), texCoords(t) {}
 	};
 
-public:
 	Mesh();
+	Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int> indices);
 	~Mesh();
 
-	bool Load(const std::string& filename, bool bUseNew = false);
-	void Draw();
+	void Draw() const;
 
 private:
-	bool LoadWavefrontObj(const std::string& filename);
-
-	glm::vec3 ParsePosition(char* buffer);
-	glm::vec3 ParseNormal(char* buffer);
-	glm::vec2 ParseTexCoord(char* buffer);
-	void ParseFace(char* buffer);
+	void GenerateBuffers();
 
 	std::vector<Vertex> mVertices;
 	std::vector<unsigned int> mIndices;
-	Texture mDiffuse;
 
 	unsigned int mVAO;
 	unsigned int mVBO;

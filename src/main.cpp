@@ -97,6 +97,7 @@ int main(int argc, char** argv)
 		return -1;
 	}
 	glfwMakeContextCurrent(pWindow);
+	glfwSwapInterval(0);
 
 	// initialize GLAD to get subsequent OpenGL functions
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -124,22 +125,23 @@ int main(int argc, char** argv)
 
 	// set up vertex data and attributes
 	// --------------------------------------------------------------------------
-	Mesh backpackMesh;
-	{
-		auto start = glfwGetTime();
-		backpackMesh.Load("assets/models/backpack/backpack.obj", true);
-		auto end = glfwGetTime();
-		printf("Loading model (old) took %fms\n", (end - start) * 1000.0f);
-	}
+	//Mesh backpackMesh;
+	//{
+	//	auto start = glfwGetTime();
+	//	backpackMesh.Load("assets/models/sponza/sponza.obj", true);
+	//	auto end = glfwGetTime();
+	//	printf("Loading model (old) took %fms\n", (end - start) * 1000.0f);
+	//}
 
 	// sample model loading
+	Model backpack;
 	{
-		 Model backpack;
 		 auto start = glfwGetTime();
-		 backpack.Load("assets/models/backpack/backpack.obj");
+		 backpack.LoadModel("assets/models/backpack/backpack.obj");
 		 auto end = glfwGetTime();
-		 printf("Loading model (new) took %fms\n", (end - start) * 1000.0f);
+		 printf("Loading model (old) took %fms\n", (end - start) * 1000.0f);
 	}
+
 
 	GLuint vao, vbo, ebo;
 	glGenVertexArrays(1, &vao);
@@ -315,7 +317,8 @@ int main(int argc, char** argv)
 		standardShader.SetUniform("view", viewMatrix);
 		standardShader.SetUniform("projection", projectionMatrix);
 		standardShader.SetUniform("lightPosition", lightPos);
-		backpackMesh.Draw();
+		//backpackMesh.Draw();
+		backpack.Draw();
 
 		// repeat for light
 		glBindVertexArray(vao);

@@ -6,62 +6,31 @@
 #include <map>
 #include <unordered_map>
 
-#include "ObjParser.h"
-
 Mesh::Mesh()
 	: mVertices()
 	, mIndices()
-	, mDiffuse()
 	, mVAO(0)
 	, mVBO(0)
 	, mEBO(0)
 {
 }
 
+Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int> indices)
+	: mVertices(vertices)
+	, mIndices(indices)
+	, mVAO(0)
+	, mVBO(0)
+	, mEBO(0)
+{
+	GenerateBuffers();
+}
+
 Mesh::~Mesh()
 {
 }
 
-bool Mesh::Load(const std::string& filename, bool bUseNew)
+void Mesh::GenerateBuffers()
 {
-	// load data
-	size_t fileExtensionPos = filename.find_last_of('.') + 1;
-	if (fileExtensionPos == filename.npos)
-	{
-		printf("Failed to determine filetype of \"%s\"\n", filename.c_str());
-		return false;
-	}
-	if (strcmp("obj", filename.substr(fileExtensionPos).c_str()) == 0)
-	{
-		ObjParser parser;
-		parser.Parse(filename);
-		std::sort(parser.indexedVertices.begin(), parser.indexedVertices.end());
-		size_t indexCount = parser.indexedVertices.size();
-		mIndices.resize(indexCount);
-		printf("%i triangles\n", indexCount / 3);
-
-		// convert obj data to a format our engine expects
-		uint32_t index = 0;
-		const ObjParser::IndexedVertex* pCurrentFace = &parser.indexedVertices[0];
-		mIndices[pCurrentFace->index] = index;
-		mVertices.emplace_back(parser.positions[pCurrentFace->p], parser.normals[pCurrentFace->n], parser.texCoords[pCurrentFace->t]);
-		for (int i = 1; i < indexCount; ++i)
-		{
-			const ObjParser::IndexedVertex& v = parser.indexedVertices[i];
-			if (v != *pCurrentFace)
-			{
-				++index;
-				pCurrentFace = &v;
-				mVertices.emplace_back(parser.positions[pCurrentFace->p], parser.normals[pCurrentFace->n], parser.texCoords[pCurrentFace->t]);
-			}
-			mIndices[v.index] = index;
-		}
-	}
-	else
-	{
-		printf("Failed to load mesh \"%s\". Unsupported file type\n", filename.c_str());
-	}
-
 	// generate buffers
 	glGenVertexArrays(1, &mVAO);
 	glGenBuffers(1, &mVBO);
@@ -88,12 +57,9 @@ bool Mesh::Load(const std::string& filename, bool bUseNew)
 
 	// unbind buffers
 	glBindVertexArray(0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	return true;
 }
 
-void Mesh::Draw()
+void Mesh::Draw() const
 {
 	// TODO: come up with a way to determine which texture index to use
 	/*glActiveTexture(GL_TEXTURE0);
