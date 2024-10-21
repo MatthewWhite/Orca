@@ -8,11 +8,11 @@
 
 typedef unsigned int shaderId_t;
 
-class ShaderProgram
+class Shader
 {
 public:
-	ShaderProgram(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
-	~ShaderProgram();
+	Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+	~Shader();
 
 	void Bind();
 
@@ -22,7 +22,7 @@ public:
 	void SetUniform(const std::string& name, const glm::mat4& value);
 
 private:
-	shaderId_t mId;
+	shaderId_t m_id;
 	std::map<std::string, int> mUniformLocationMap;
 
 	int GetUniformLocation(const std::string& name);

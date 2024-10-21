@@ -11,8 +11,9 @@
 #include "Renderer/Camera.h"
 #include "Renderer/Mesh.h"
 #include "Renderer/Model.h"
-#include "Renderer/ShaderProgram.h"
+#include "Renderer/Shader.h"
 #include "Renderer/Texture.h"
+#include "Renderer/TextureManager.h"
 
 void OnFramebufferResize(GLFWwindow* pWindow, int width, int height);
 void ProcessInput(GLFWwindow* pWindow);
@@ -112,36 +113,26 @@ int main(int argc, char** argv)
 
 	// subsystem initialization
 	// --------------------------------------------------------------------------
-	Texture::InitTextureLoader();
 	InputManager* pInputManager = InputManager::GetInstance();
 	pInputManager->SetContext(pWindow);
+	TextureManager* pTextureManager = TextureManager::GetInstance();
 
 	// compile and link shaders
 	// --------------------------------------------------------------------------
-	ShaderProgram standardShader("assets/shaders/standard.vert", "assets/shaders/standard.frag");
-	ShaderProgram blendedShader("assets/shaders/blended_textures.vert", "assets/shaders/blended_textures.frag");
-	ShaderProgram solidShader("assets/shaders/solid_color.vert", "assets/shaders/solid_color.frag");
-	ShaderProgram phongShader("assets/shaders/phong_solid.vert", "assets/shaders/phong_solid.frag");
+	Shader standardShader("assets/shaders/standard.vert", "assets/shaders/standard.frag");
+	Shader blendedShader("assets/shaders/blended_textures.vert", "assets/shaders/blended_textures.frag");
+	Shader solidShader("assets/shaders/solid_color.vert", "assets/shaders/solid_color.frag");
+	Shader phongShader("assets/shaders/phong_solid.vert", "assets/shaders/phong_solid.frag");
 
 	// set up vertex data and attributes
 	// --------------------------------------------------------------------------
-	//Mesh backpackMesh;
-	//{
-	//	auto start = glfwGetTime();
-	//	backpackMesh.Load("assets/models/sponza/sponza.obj", true);
-	//	auto end = glfwGetTime();
-	//	printf("Loading model (old) took %fms\n", (end - start) * 1000.0f);
-	//}
-
-	// sample model loading
 	Model backpack;
 	{
 		 auto start = glfwGetTime();
-		 backpack.LoadModel("assets/models/backpack/backpack.obj");
+		 backpack.LoadModel("assets/models/sponza/sponza.obj");
 		 auto end = glfwGetTime();
-		 printf("Loading model (old) took %fms\n", (end - start) * 1000.0f);
+		 printf("Loading model (assimp) took %fms\n", (end - start) * 1000.0f);
 	}
-
 
 	GLuint vao, vbo, ebo;
 	glGenVertexArrays(1, &vao);
@@ -169,12 +160,12 @@ int main(int argc, char** argv)
 
 	// textures
 	// --------------------------------------------------------------------------
-	Texture texture1("assets/textures/container.jpg");
-	Texture texture2("assets/textures/awesomeface.png");
-	Texture diffuse("assets/textures/container2_d.png");
-	Texture specular("assets/textures/container2_s.png");
-	Texture backpackDiffuse("assets/models/backpack/diffuse_d.jpg");
-	Texture backpackSpecular("assets/models/backpack/specular_s.jpg");
+	Texture* pTexture1 = pTextureManager->CreateTexture("assets/textures/container.jpg", true);
+	Texture* pTexture2 = pTextureManager->CreateTexture("assets/textures/awesomeface.png", true);
+	Texture* pDiffuse = pTextureManager->CreateTexture("assets/textures/container2_d.png", true);
+	Texture* pSpecular = pTextureManager->CreateTexture("assets/textures/container2_s.png");
+	Texture* pBackpackDiffuse = pTextureManager->CreateTexture("assets/models/backpack/diffuse_d.jpg", true);
+	Texture* pBackpackSpecular = pTextureManager->CreateTexture("assets/models/backpack/specular_s.jpg");
 	blendedShader.Bind();
 	blendedShader.SetUniform("texture1", 0);
 	blendedShader.SetUniform("texture2", 1);
@@ -276,9 +267,9 @@ int main(int argc, char** argv)
 
 		// bind our textures
 		glActiveTexture(GL_TEXTURE0);
-		texture1.Bind();
+		pTexture1->Bind();
 		glActiveTexture(GL_TEXTURE1);
-		texture2.Bind();
+		pTexture2->Bind();
 
 		// bind our matrices
 		blendedShader.Bind();
@@ -294,9 +285,9 @@ int main(int argc, char** argv)
 
 		// repeat for container
 		glActiveTexture(GL_TEXTURE0);
-		diffuse.Bind();
+		pDiffuse->Bind();
 		glActiveTexture(GL_TEXTURE1);
-		specular.Bind();
+		pSpecular->Bind();
 
 		standardShader.Bind();
 		standardShader.SetUniform("viewPos", camera.GetPosition());
@@ -308,9 +299,9 @@ int main(int argc, char** argv)
 
 		// repeat for backpack
 		glActiveTexture(GL_TEXTURE0);
-		backpackDiffuse.Bind();
+		pBackpackDiffuse->Bind();
 		glActiveTexture(GL_TEXTURE1);
-		backpackSpecular.Bind();
+		pBackpackSpecular->Bind();
 		standardShader.Bind();
 		standardShader.SetUniform("viewPos", camera.GetPosition());
 		standardShader.SetUniform("model", backpackTransform);

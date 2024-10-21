@@ -34,7 +34,7 @@ void Model::LoadModel(const std::string& filename)
 	m_directory = filename.substr(0, directorySeperatorPos + 1);
 
 	Assimp::Importer importer;
-	const aiScene* pScene = importer.ReadFile(filename, aiProcessPreset_TargetRealtime_Fast);
+	const aiScene* pScene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_JoinIdenticalVertices);
 	if (!pScene || !pScene->mRootNode || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE)
 	{
 		printf("Error loading model \"%s\": %s\n", filename.c_str(), importer.GetErrorString());

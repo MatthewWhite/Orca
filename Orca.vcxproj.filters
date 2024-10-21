@@ -3,16 +3,15 @@
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="libs\glad\src\glad.c" />
-    <ClCompile Include="src\Renderer\ShaderProgram.cpp" />
     <ClCompile Include="src\Renderer\Texture.cpp" />
     <ClCompile Include="src\Core\Utils.cpp" />
     <ClCompile Include="src\Renderer\Camera.cpp" />
     <ClCompile Include="src\Core\InputManager.cpp" />
     <ClCompile Include="src\Renderer\Mesh.cpp" />
     <ClCompile Include="src\Renderer\Model.cpp" />
+    <ClCompile Include="src\Renderer\Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Renderer\ShaderProgram.h" />
     <ClInclude Include="libs\stb\stb_image.h" />
     <ClInclude Include="src\Renderer\Texture.h" />
     <ClInclude Include="src\Core\Utils.h" />
@@ -20,5 +19,6 @@
     <ClInclude Include="src\Core\InputManager.h" />
     <ClInclude Include="src\Renderer\Mesh.h" />
     <ClInclude Include="src\Renderer\Model.h" />
+    <ClInclude Include="src\Renderer\Shader.h" />
   </ItemGroup>
 </Project>

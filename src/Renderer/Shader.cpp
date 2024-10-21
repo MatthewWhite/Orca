@@ -1,4 +1,4 @@
-#include "ShaderProgram.h"
+#include "Shader.h"
 
 #include <cerrno>
 #include <cstdio>
@@ -9,10 +9,10 @@
 #include "Core/Utils.h"
 
 
-shaderId_t ShaderProgram::sCurrentProgram = 0;
+shaderId_t Shader::sCurrentProgram = 0;
 
-ShaderProgram::ShaderProgram(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
-	: mId(0)
+Shader::Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
+	: m_id(0)
 	, mUniformLocationMap()
 {
 	auto CheckShaderCompileStatus = [](GLuint shader) -> void
@@ -23,7 +23,7 @@ ShaderProgram::ShaderProgram(const std::string& vertexShaderPath, const std::str
 		{
 			char infoLog[512];
 			glGetShaderInfoLog(shader, 512, NULL, infoLog);
-			printf("ShaderProgram compilation failed. %s\n", infoLog);
+			printf("Shader compilation failed. %s\n", infoLog);
 		}
 	};
 	auto CheckProgramLinkStatus = [](GLuint program) -> void
@@ -66,11 +66,11 @@ ShaderProgram::ShaderProgram(const std::string& vertexShaderPath, const std::str
 	CheckShaderCompileStatus(fragmentShader);
 
 	// link shaders together
-	mId = glCreateProgram();
-	glAttachShader(mId, vertexShader);
-	glAttachShader(mId, fragmentShader);
-	glLinkProgram(mId);
-	CheckProgramLinkStatus(mId);
+	m_id = glCreateProgram();
+	glAttachShader(m_id, vertexShader);
+	glAttachShader(m_id, fragmentShader);
+	glLinkProgram(m_id);
+	CheckProgramLinkStatus(m_id);
 
 	// clean up source code pointers and delete shaders
 	delete[] pVertexShaderSource;
@@ -81,43 +81,43 @@ ShaderProgram::ShaderProgram(const std::string& vertexShaderPath, const std::str
 	// TODO: pre-populate uniform map with locations of uniforms
 }
 
-ShaderProgram::~ShaderProgram()
+Shader::~Shader()
 {
-	glDeleteProgram(mId);
+	glDeleteProgram(m_id);
 }
 
-void ShaderProgram::Bind()
+void Shader::Bind()
 {
-	if (sCurrentProgram == mId)
+	if (sCurrentProgram == m_id)
 	{
 		return;
 	}
 
-	glUseProgram(mId);
-	sCurrentProgram = mId;
+	glUseProgram(m_id);
+	sCurrentProgram = m_id;
 }
 
-void ShaderProgram::SetUniform(const std::string& name, int value)
+void Shader::SetUniform(const std::string& name, int value)
 {
 	glUniform1i(GetUniformLocation(name), value);
 }
 
-void ShaderProgram::SetUniform(const std::string& name, float value)
+void Shader::SetUniform(const std::string& name, float value)
 {
 	glUniform1f(GetUniformLocation(name), value);
 }
 
-void ShaderProgram::SetUniform(const std::string& name, const glm::vec3& value)
+void Shader::SetUniform(const std::string& name, const glm::vec3& value)
 {
 	glUniform3fv(GetUniformLocation(name), 1, glm::value_ptr(value));
 }
 
-void ShaderProgram::SetUniform(const std::string& name, const glm::mat4& value)
+void Shader::SetUniform(const std::string& name, const glm::mat4& value)
 {
 	glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
 }
 
-int ShaderProgram::GetUniformLocation(const std::string& name)
+int Shader::GetUniformLocation(const std::string& name)
 {
 	auto it = mUniformLocationMap.find(name);
 	if (it != mUniformLocationMap.end())
@@ -125,7 +125,7 @@ int ShaderProgram::GetUniformLocation(const std::string& name)
 		return it->second;
 	}
 
-	GLint loc = glGetUniformLocation(mId, name.c_str());
+	GLint loc = glGetUniformLocation(m_id, name.c_str());
 	if (loc != GL_INVALID_INDEX)
 	{
 		mUniformLocationMap[name] = loc;

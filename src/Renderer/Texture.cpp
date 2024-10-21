@@ -1,170 +1,133 @@
 #include "Texture.h"
 
+#include <glm/gtc/type_ptr.hpp>
+#ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
+#endif
 #include <stb_image.h>
-
-namespace
-{
-	const GLint OGL_WRAP_MODES[Texture::WrapMode::WM_COUNT] =
-	{
-		GL_REPEAT,              // WM_REPEAT
-		GL_CLAMP_TO_EDGE,       // WM_CLAMP
-		GL_MIRRORED_REPEAT,     // WM_MIRROR
-	};
-}
 
 textureId_t Texture::s_currentTexture = 0;
 
-void Texture::InitTextureLoader()
-{
-	stbi_set_flip_vertically_on_load(true);
-}
-
 Texture::Texture()
-	: mId(0)
-	, mWrapModeU(WrapMode::WM_INVALID)
-	, mWrapModeV(WrapMode::WM_INVALID)
-	, mFilterModeMin(FilterMode::FM_INVALID)
-	, mFilterModeMag(FilterMode::FM_INVALID)
-	, mWidth(0)
-	, mHeight(0)
+	: m_id(0)
+	, m_width(0)
+	, m_height(0)
 {
-
 }
 
-Texture::Texture(const std::string& filename)
-	: mId(0)
-	, mWrapModeU(WrapMode::WM_INVALID)
-	, mWrapModeV(WrapMode::WM_INVALID)
-	, mFilterModeMin(FilterMode::FM_INVALID)
-	, mFilterModeMag(FilterMode::FM_INVALID)
-	, mWidth(0)
-	, mHeight(0)
+Texture::Texture(const std::string& filename, const TextureParams& params, bool isSRGB)
+	: m_id(0)
+	, m_width(0)
+	, m_height(0)
 {
-	Load(filename);
+	Load(filename, params, isSRGB);
 }
 
-void Texture::Load(const std::string& filename)
+Texture::~Texture()
 {
+	glDeleteTextures(1, &m_id);
+}
+
+void Texture::Load(const std::string& filename, const TextureParams& params, bool isSRGB)
+{
+	stbi_set_flip_vertically_on_load(params.bFlipVerticallyOnLoad);
+
 	int numChannels;
-	unsigned char* pTextureData = stbi_load(filename.c_str(), &mWidth, &mHeight, &numChannels, 0);
+	unsigned char* pTextureData = stbi_load(filename.c_str(), &m_width, &m_height, &numChannels, 0);
 	if (!pTextureData)
 	{
 		printf("Failed to load texture \"%s\"\n", filename.c_str());
 		return;
 	}
 
-	size_t nameEndPos = filename.find_last_of(".");
-	const bool bGammaCorrect = filename[nameEndPos - 2] != '_' || filename[nameEndPos - 1] == 'd';
-
 	GLenum format = GL_RGBA;
 	GLenum internalFormat = format;
-	if (numChannels == 3)
+	switch (numChannels)
 	{
+	case 1:
+		format = GL_RED;
+		internalFormat = GL_R8;
+		break;
+	case 2:
+		format = GL_RG;
+		internalFormat = GL_RG8;
+		break;
+	case 3:
 		format = GL_RGB;
-		internalFormat = bGammaCorrect ? GL_SRGB : format;
-	}
-	else
-	{
-		if (bGammaCorrect)
-			internalFormat = GL_SRGB_ALPHA;
+		internalFormat = isSRGB ? GL_SRGB8 : GL_RGB8;
+		break;
+	case 4:
+		format = GL_RGBA;
+		internalFormat = isSRGB? GL_SRGB8_ALPHA8 : GL_RGBA8;
+		break;
+	default:
+		printf("Error. Unsupported number of channels (%i) in texture \"%s\"\n", numChannels, filename.c_str());
+		break;
 	}
 
-	glGenTextures(1, &mId);
+	glGenTextures(1, &m_id);
 	Bind();
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, (void*)pTextureData);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, mWidth, mHeight, 0, format, GL_UNSIGNED_BYTE, (void*)pTextureData);
-
-	SetWrapMode(WrapMode::WM_REPEAT);
 	glGenerateMipmap(GL_TEXTURE_2D);
-	SetFilterMode(FilterMode::FM_LINEAR);
+	ApplyParams(params);
 
 	stbi_image_free(pTextureData);
 }
 
-void Texture::SetWrapMode(WrapMode wrapModeU, WrapMode wrapModeV)
+void Texture::ApplyParams(const TextureParams& params)
 {
-	if (wrapModeV == WM_INVALID)
+	switch (params.filterMode)
 	{
-		wrapModeV = wrapModeU;
-	}
-
-	if (mWrapModeU == wrapModeU && mWrapModeV == wrapModeV)
-	{
-		// no change necessary
-		return;
-	}
-
-	Bind();
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, OGL_WRAP_MODES[wrapModeU]);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, OGL_WRAP_MODES[wrapModeV]);
-	mWrapModeU = wrapModeU;
-	mWrapModeV = wrapModeV;
-}
-
-void Texture::SetFilterMode(FilterMode filterModeMin, FilterMode filterModeMag)
-{
-	if (filterModeMag == FM_INVALID)
-	{
-		filterModeMag = filterModeMin;
-	}
-
-	if (mFilterModeMin == filterModeMin && mFilterModeMag == filterModeMag)
-	{
-		// no change necessary
-		return;
-	}
-
-	Bind();
-
-	switch (filterModeMin)
-	{
-	case Texture::FM_NEAREST:
-		glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	case FM_NEAREST:
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		break;
-	case Texture::FM_LINEAR:
-		glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	case FM_BILINEAR:
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		break;
-	case Texture::FM_NEARESTMIPMAP:
-		glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-		break;
-	case Texture::FM_TRILINIEARMIPMAP:
-		glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	case FM_TRILINEAR:
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		break;
 	default:
-		printf("Unknown minification filter mode %i\n", filterModeMin);
+		printf("Error. Invalid filter mode %i specified for texture\n", params.filterMode);
 		break;
 	}
 
-	switch (filterModeMag)
+	switch (params.wrapMode)
 	{
-	case Texture::FM_NEAREST:
-		glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	case WM_REPEAT:
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		break;
-	case Texture::FM_LINEAR:
-		glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	case WM_CLAMP:
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		break;
+	case WM_BORDER:
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(params.borderColor));
+		break;
+	case WM_MIRROR:
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 		break;
 	default:
-		printf("Unknown/unsupported magnification filter mode %d\n", filterModeMag);
+		printf("Error. Invalid wrap mode %i specified for texture\n", params.wrapMode);
 		break;
 	}
-
-	mFilterModeMin = filterModeMin;
-	mFilterModeMag = filterModeMag;
-}
-
-Texture::~Texture()
-{
-	glDeleteTextures(1, &mId);
 }
 
 void Texture::Bind()
 {
-	if (s_currentTexture == mId)
+	if (s_currentTexture == m_id)
 	{
 		return;
 	}
 
-	glBindTexture(GL_TEXTURE_2D, mId);
-	s_currentTexture = mId;
+	glBindTexture(GL_TEXTURE_2D, m_id);
+	s_currentTexture = m_id;
 }

@@ -4,61 +4,57 @@
 #include <string>
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 
 typedef unsigned int textureId_t;
 
+enum TextureWrapMode
+{
+	WM_REPEAT,
+	WM_CLAMP,
+	WM_BORDER,
+	WM_MIRROR,
+};
+
+enum TextureFilterMode
+{
+	FM_NEAREST,		// nearest neighbor
+	FM_BILINEAR,	// linear interpolation between texels within closest mipmap
+	FM_TRILINEAR,	// linear interpolation between texels and between closest mipmaps
+};
+
+struct TextureParams
+{
+	TextureFilterMode filterMode = FM_BILINEAR;
+	TextureWrapMode wrapMode = WM_REPEAT;
+	glm::vec4 borderColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	bool bGenerateMips = true;
+	bool bFlipVerticallyOnLoad = true;
+};
+
 class Texture
 {
+	friend class TextureManager;
+
 public:
-	enum WrapMode
-	{
-		WM_REPEAT,
-		WM_CLAMP,
-		WM_MIRROR,
-
-		WM_COUNT,
-		WM_INVALID
-	};
-
-	enum FilterMode
-	{
-		FM_NEAREST,
-		FM_LINEAR,
-		FM_NEARESTMIPMAP,
-		FM_TRILINIEARMIPMAP,
-
-		FM_COUNT,
-		FM_INVALID
-	};
-
-	Texture();
-	Texture(const std::string& filename);
-	~Texture();
-
-	void Load(const std::string& filename);
-
 	void Bind();
 
-	void SetWrapMode(WrapMode wrapModeU, WrapMode wrapModeV = WM_INVALID);
-	void SetFilterMode(FilterMode filterModeMin, FilterMode filterModeMag = FM_INVALID);
-
-	unsigned int GetWidth() const { return mWidth; }
-	unsigned int GetHeight() const { return mHeight; }
-
-	static void InitTextureLoader();
+	unsigned int GetWidth() const { return m_width; }
+	unsigned int GetHeight() const { return m_height; }
 
 private:
-	textureId_t mId;
-
-	WrapMode mWrapModeU;
-	WrapMode mWrapModeV;
-	FilterMode mFilterModeMin;
-	FilterMode mFilterModeMag;
-
-	int mWidth;
-	int mHeight;
+	textureId_t m_id;
+	int m_width;
+	int m_height;
 
 	static textureId_t s_currentTexture;
+
+	Texture();
+	Texture(const std::string& filename, const TextureParams& params, bool isSRGB = false);
+	~Texture();
+
+	void Load(const std::string& filename, const TextureParams& params, bool isSRGB = false);
+	void ApplyParams(const TextureParams& params);
 };
 
 #endif
