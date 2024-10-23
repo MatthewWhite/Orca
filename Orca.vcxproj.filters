@@ -10,6 +10,8 @@
     <ClCompile Include="src\Renderer\Mesh.cpp" />
     <ClCompile Include="src\Renderer\Model.cpp" />
     <ClCompile Include="src\Renderer\Shader.cpp" />
+    <ClCompile Include="src\Renderer\TextureManager.cpp" />
+    <ClCompile Include="src\Renderer\Material.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="libs\stb\stb_image.h" />
@@ -20,5 +22,7 @@
     <ClInclude Include="src\Renderer\Mesh.h" />
     <ClInclude Include="src\Renderer\Model.h" />
     <ClInclude Include="src\Renderer\Shader.h" />
+    <ClInclude Include="src\Renderer\TextureManager.h" />
+    <ClInclude Include="src\Renderer\Material.h" />
   </ItemGroup>
 </Project>

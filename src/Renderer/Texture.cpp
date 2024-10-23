@@ -9,14 +9,16 @@
 textureId_t Texture::s_currentTexture = 0;
 
 Texture::Texture()
-	: m_id(0)
+	: m_filename("")
+	, m_id(0)
 	, m_width(0)
 	, m_height(0)
 {
 }
 
 Texture::Texture(const std::string& filename, const TextureParams& params, bool isSRGB)
-	: m_id(0)
+	: m_filename(filename)
+	, m_id(0)
 	, m_width(0)
 	, m_height(0)
 {
@@ -92,7 +94,7 @@ void Texture::ApplyParams(const TextureParams& params)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		break;
 	default:
-		printf("Error. Invalid filter mode %i specified for texture\n", params.filterMode);
+		printf("Error. Invalid filter mode %i specified for texture \"%s\"\n", params.filterMode, m_filename.c_str());
 		break;
 	}
 
@@ -116,7 +118,7 @@ void Texture::ApplyParams(const TextureParams& params)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 		break;
 	default:
-		printf("Error. Invalid wrap mode %i specified for texture\n", params.wrapMode);
+		printf("Error. Invalid wrap mode %i specified for texture \"%s\"\n", params.wrapMode, m_filename.c_str());
 		break;
 	}
 }

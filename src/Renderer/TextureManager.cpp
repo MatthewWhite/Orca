@@ -33,13 +33,28 @@ Texture* TextureManager::CreateTexture(const std::string& filename, const Textur
 	auto it = m_textures.find(filename);
 	if (it != m_textures.end())
 	{
-		return it->second;
+		return it->second.pTexture;
 	}
 
 	Texture* pTexture = new Texture(filename, params, isSRGB);
 	if (pTexture)
 	{
-		m_textures[filename] = pTexture;
+		m_textures.emplace(std::piecewise_construct, std::forward_as_tuple(filename), std::forward_as_tuple(pTexture, 1));
 	}
 	return pTexture;
+}
+
+void TextureManager::DeleteTexture(Texture* pTexture)
+{
+	auto it = m_textures.find(pTexture->m_filename);
+	if (it == m_textures.end())
+	{
+		printf("No texture \"%s\" found in TextureManager\n", pTexture->m_filename.c_str());
+	}
+
+	if (--it->second.refCount == 0)
+	{
+		delete it->second.pTexture;
+		m_textures.erase(it);
+	}
 }

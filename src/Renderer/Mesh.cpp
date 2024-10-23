@@ -7,22 +7,25 @@
 #include <unordered_map>
 
 Mesh::Mesh()
-	: mVertices()
-	, mIndices()
-	, mVAO(0)
-	, mVBO(0)
-	, mEBO(0)
+	: m_material()
+	, m_vertices()
+	, m_indices()
+	, m_vao(0)
+	, m_vbo(0)
+	, m_ebo(0)
 {
+	m_material.SetShader("assets/shaders/standard.vert", "assets/shaders/standard.frag");
 }
 
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int> indices)
-	: mVertices(vertices)
-	, mIndices(indices)
-	, mVAO(0)
-	, mVBO(0)
-	, mEBO(0)
+	: m_vertices(vertices)
+	, m_indices(indices)
+	, m_vao(0)
+	, m_vbo(0)
+	, m_ebo(0)
 {
 	GenerateBuffers();
+	m_material.SetShader("assets/shaders/standard.vert", "assets/shaders/standard.frag");
 }
 
 Mesh::~Mesh()
@@ -32,18 +35,18 @@ Mesh::~Mesh()
 void Mesh::GenerateBuffers()
 {
 	// generate buffers
-	glGenVertexArrays(1, &mVAO);
-	glGenBuffers(1, &mVBO);
-	glGenBuffers(1, &mEBO);
+	glGenVertexArrays(1, &m_vao);
+	glGenBuffers(1, &m_vbo);
+	glGenBuffers(1, &m_ebo);
 
-	glBindVertexArray(mVAO);
+	glBindVertexArray(m_vao);
 
-	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-	glBufferData(GL_ARRAY_BUFFER, mVertices.size() * sizeof(Vertex), mVertices.data(), GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+	glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), m_vertices.data(), GL_STATIC_DRAW);
 
 	// NOTE: VAO stores any EBO bound, so don't unbind EBO until VAO is unbound
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndices.size() * sizeof(unsigned int), mIndices.data(), GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(unsigned int), m_indices.data(), GL_STATIC_DRAW);
 
 	// position
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
@@ -65,6 +68,6 @@ void Mesh::Draw() const
 	/*glActiveTexture(GL_TEXTURE0);
 	mDiffuse.Bind();*/
 
-	glBindVertexArray(mVAO);
-	glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(m_vao);
+	glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
 }

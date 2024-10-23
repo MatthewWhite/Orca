@@ -43,6 +43,7 @@ public:
 	unsigned int GetHeight() const { return m_height; }
 
 private:
+	std::string m_filename;
 	textureId_t m_id;
 	int m_width;
 	int m_height;

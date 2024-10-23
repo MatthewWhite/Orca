@@ -5,6 +5,8 @@
 #include <assimp/scene.h>
 #include <glm/glm.hpp>
 
+#include "TextureManager.h"
+
 // TEMP
 #include "Core/InputManager.h"
 
@@ -34,7 +36,8 @@ void Model::LoadModel(const std::string& filename)
 	m_directory = filename.substr(0, directorySeperatorPos + 1);
 
 	Assimp::Importer importer;
-	const aiScene* pScene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_JoinIdenticalVertices);
+	unsigned int postProcessFlags = aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_JoinIdenticalVertices | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes;
+	const aiScene* pScene = importer.ReadFile(filename, postProcessFlags);
 	if (!pScene || !pScene->mRootNode || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE)
 	{
 		printf("Error loading model \"%s\": %s\n", filename.c_str(), importer.GetErrorString());
@@ -115,5 +118,34 @@ Mesh Model::ProcessAssimpMesh(const aiMesh* pMesh, const aiScene* pScene)
 		*(pIndex++) = pMesh->mFaces[i].mIndices[2];
 	}
 
-	return Mesh(vertices, indices);
+	Mesh mesh(vertices, indices);
+	if (pMesh->mMaterialIndex >= 0)
+	{
+		aiMaterial* aiMat = pScene->mMaterials[pMesh->mMaterialIndex];
+		Material& material = mesh.GetMaterial();
+
+		float shininess = 0.0f;
+		auto ret = aiMat->Get(AI_MATKEY_SHININESS, shininess);
+		material.SetFloat("material.shininess", shininess);
+
+		if (aiMat->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+		{
+			aiString diffuseTexture;
+			ret = aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &diffuseTexture);
+			Texture* pDiffuse = TextureManager::GetInstance()->CreateTexture(diffuseTexture.C_Str(), true);
+			material.SetInteger("material.diffuse", 0);
+			material.SetTexture("material.diffuse", pDiffuse);
+		}
+
+		if (aiMat->GetTextureCount(aiTextureType_SPECULAR) > 0)
+		{
+			aiString specularTexture;
+			ret = aiMat->GetTexture(aiTextureType_SPECULAR, 0, &specularTexture);
+			Texture* pSpecular = TextureManager::GetInstance()->CreateTexture(specularTexture.C_Str());
+			material.SetInteger("material.specular", 1);
+			material.SetTexture("material.specular", pSpecular);
+		}
+	}
+
+	return mesh;
 }

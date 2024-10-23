@@ -6,6 +6,7 @@
 
 #include <glm/glm.hpp>
 
+#include "Material.h"
 #include "Texture.h"
 
 class Mesh
@@ -24,17 +25,20 @@ public:
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int> indices);
 	~Mesh();
 
+	Material& GetMaterial() { return m_material; }
+
 	void Draw() const;
 
 private:
 	void GenerateBuffers();
 
-	std::vector<Vertex> mVertices;
-	std::vector<unsigned int> mIndices;
+	Material m_material;
+	std::vector<Vertex> m_vertices;
+	std::vector<unsigned int> m_indices;
 
-	unsigned int mVAO;
-	unsigned int mVBO;
-	unsigned int mEBO;
+	unsigned int m_vao;
+	unsigned int m_vbo;
+	unsigned int m_ebo;
 };
 
 #endif
