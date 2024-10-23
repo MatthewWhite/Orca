@@ -50,9 +50,9 @@ void Model::LoadModel(const std::string& filename)
 
 void Model::Draw() const
 {
-	for (const auto& it : m_meshes)
+	for (const auto it : m_meshes)
 	{
-		it.Draw();
+		it->Draw();
 	}
 
 	//static int i = 0;
@@ -70,6 +70,17 @@ void Model::Draw() const
 	//m_meshes[i].Draw();
 }
 
+// TEMP
+void Model::SetTransform(const glm::mat4& transform)
+{
+	m_transform = transform;
+
+	for (auto it : m_meshes)
+	{
+		it->GetMaterial().SetMat4("model", m_transform);
+	}
+}
+
 void Model::ProcessAssimpNode(const aiNode* pNode, const aiScene* pScene)
 {
 	for (unsigned int i = 0; i < pNode->mNumMeshes; ++i)
@@ -83,7 +94,7 @@ void Model::ProcessAssimpNode(const aiNode* pNode, const aiScene* pScene)
 	}
 }
 
-Mesh Model::ProcessAssimpMesh(const aiMesh* pMesh, const aiScene* pScene)
+Mesh* Model::ProcessAssimpMesh(const aiMesh* pMesh, const aiScene* pScene)
 {
 	std::vector<Mesh::Vertex> vertices;
 	vertices.reserve(pMesh->mNumVertices);
@@ -118,11 +129,11 @@ Mesh Model::ProcessAssimpMesh(const aiMesh* pMesh, const aiScene* pScene)
 		*(pIndex++) = pMesh->mFaces[i].mIndices[2];
 	}
 
-	Mesh mesh(vertices, indices);
+	Mesh* mesh = new Mesh(vertices, indices);
 	if (pMesh->mMaterialIndex >= 0)
 	{
 		aiMaterial* aiMat = pScene->mMaterials[pMesh->mMaterialIndex];
-		Material& material = mesh.GetMaterial();
+		Material& material = mesh->GetMaterial();
 
 		float shininess = 0.0f;
 		auto ret = aiMat->Get(AI_MATKEY_SHININESS, shininess);
@@ -132,7 +143,7 @@ Mesh Model::ProcessAssimpMesh(const aiMesh* pMesh, const aiScene* pScene)
 		{
 			aiString diffuseTexture;
 			ret = aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &diffuseTexture);
-			Texture* pDiffuse = TextureManager::GetInstance()->CreateTexture(diffuseTexture.C_Str(), true);
+			Texture* pDiffuse = TextureManager::GetInstance()->CreateTexture(m_directory + diffuseTexture.C_Str(), true);
 			material.SetInteger("material.diffuse", 0);
 			material.SetTexture("material.diffuse", pDiffuse);
 		}
@@ -141,7 +152,7 @@ Mesh Model::ProcessAssimpMesh(const aiMesh* pMesh, const aiScene* pScene)
 		{
 			aiString specularTexture;
 			ret = aiMat->GetTexture(aiTextureType_SPECULAR, 0, &specularTexture);
-			Texture* pSpecular = TextureManager::GetInstance()->CreateTexture(specularTexture.C_Str());
+			Texture* pSpecular = TextureManager::GetInstance()->CreateTexture(m_directory + specularTexture.C_Str());
 			material.SetInteger("material.specular", 1);
 			material.SetTexture("material.specular", pSpecular);
 		}

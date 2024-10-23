@@ -22,11 +22,18 @@ Material::~Material()
 
 void Material::ApplyParams()
 {
+	m_shader->Bind();
+
 	for (const auto& textureIt : m_textures)
 	{
 		int textureUnit = m_integerParams[textureIt.first];
 		glActiveTexture(GL_TEXTURE0 + textureUnit);
 		textureIt.second->Bind();
+	}
+
+	for (const auto& mat4It : m_mat4Params)
+	{
+		m_shader->SetUniform(mat4It.first, mat4It.second);
 	}
 
 	for (const auto& vec4It : m_vec4Params)
@@ -53,6 +60,11 @@ void Material::ApplyParams()
 void Material::SetShader(const std::string& vertexShader, const std::string& fragmentShader)
 {
 	m_shader = new Shader(vertexShader, fragmentShader);
+}
+
+void Material::SetMat4(const std::string& name, const glm::mat4& mat4)
+{
+	m_mat4Params[name] = mat4;
 }
 
 void Material::SetTexture(const std::string& name, Texture* pTexture)

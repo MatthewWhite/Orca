@@ -83,7 +83,8 @@ Shader::Shader(const std::string& vertexShaderPath, const std::string& fragmentS
 
 Shader::~Shader()
 {
-	glDeleteProgram(m_id);
+	// TODO: need to manage shaders such that we can delete them when appropriate
+	//glDeleteProgram(m_id);
 }
 
 void Shader::Bind()

@@ -6,6 +6,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Core/InputManager.h"
 #include "Renderer/Camera.h"
@@ -119,17 +120,14 @@ int main(int argc, char** argv)
 
 	// compile and link shaders
 	// --------------------------------------------------------------------------
-	Shader standardShader("assets/shaders/standard.vert", "assets/shaders/standard.frag");
-	Shader blendedShader("assets/shaders/blended_textures.vert", "assets/shaders/blended_textures.frag");
 	Shader solidShader("assets/shaders/solid_color.vert", "assets/shaders/solid_color.frag");
-	Shader phongShader("assets/shaders/phong_solid.vert", "assets/shaders/phong_solid.frag");
 
 	// set up vertex data and attributes
 	// --------------------------------------------------------------------------
-	Model backpack;
+	Model model;
 	{
 		 auto start = glfwGetTime();
-		 backpack.LoadModel("assets/models/sponza/sponza.obj");
+		 model.LoadModel("assets/models/sponza/sponza.obj");
 		 auto end = glfwGetTime();
 		 printf("Loading model (assimp) took %fms\n", (end - start) * 1000.0f);
 	}
@@ -158,21 +156,6 @@ int main(int argc, char** argv)
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
 	glEnableVertexAttribArray(2);
 
-	// textures
-	// --------------------------------------------------------------------------
-	Texture* pTexture1 = pTextureManager->CreateTexture("assets/textures/container.jpg", true);
-	Texture* pTexture2 = pTextureManager->CreateTexture("assets/textures/awesomeface.png", true);
-	Texture* pDiffuse = pTextureManager->CreateTexture("assets/textures/container2_d.png", true);
-	Texture* pSpecular = pTextureManager->CreateTexture("assets/textures/container2_s.png");
-	Texture* pBackpackDiffuse = pTextureManager->CreateTexture("assets/models/backpack/diffuse_d.jpg", true);
-	Texture* pBackpackSpecular = pTextureManager->CreateTexture("assets/models/backpack/specular_s.jpg");
-	blendedShader.Bind();
-	blendedShader.SetUniform("texture1", 0);
-	blendedShader.SetUniform("texture2", 1);
-	standardShader.Bind();
-	standardShader.SetUniform("diffuseMap", 0);
-	standardShader.SetUniform("specularMap", 1);
-
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
 
@@ -186,28 +169,15 @@ int main(int argc, char** argv)
 	const float nearPlane = 0.1f;
 	const float farPlane = 1000.0f;
 	Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT, fov, nearPlane, farPlane);
-	camera.SetPosition(glm::vec3(0.0f, 0.0f, -1.0f));
-	camera.LookAt(glm::vec3(-1.0f, 0.25f, -1.0f));
+	camera.SetPosition(glm::vec3(5.0f, 0.0f, -1.85f));
+	camera.LookAt(glm::vec3(0.0f, 1.0f, -1.85f));
 	camera.SetMovementSpeed(2.0f);
 
 	// transforms
 	// --------------------------------------------------------------------------
-	glm::mat4 containerTransform = glm::mat4(1.0f);
-	containerTransform = glm::translate(containerTransform, glm::vec3(0.0f, 0.0f, 0.0f));
-
-	glm::mat4 transform = glm::mat4(1.0f);
-	transform = glm::translate(transform, glm::vec3(1.5f, 0.3f, -2.0f));
-	transform = glm::rotate(transform, glm::radians(60.0f), glm::vec3(1.0f, 0.3f, 0.5f));
-
-	glm::mat4 backpackTransform(1.0f);
-	backpackTransform = glm::translate(backpackTransform, glm::vec3(-1.0f, -1.0f, -1.5f));
-
-	//glm::mat4 backpackTransform = glm::mat4(1.0f);
-	//backpackTransform = glm::translate(backpackTransform, glm::vec3(-1.3f, 0.0f, -1.5f));
-	float rotationAngle = 0.0f;
-	float degreesPerSecond = 45.0f;
-	glm::vec3 offset(-1.7f, 0.0f, 0.0f);
-	glm::vec3 solidBoxRotationPoint(-2.2f, -1.7f, -0.7f);
+	glm::mat4 modelTransform(1.0f);
+	modelTransform = glm::translate(modelTransform, glm::vec3(-1.0f, -1.0f, -1.5f));
+	modelTransform = glm::scale(modelTransform, glm::vec3(0.01f, 0.01f, 0.01f));
 
 	glm::mat4 lightTransform = glm::mat4(1.0f);
 	lightTransform = glm::translate(lightTransform, glm::vec3(-3.0f, 1.3f, -0.7f));
@@ -217,24 +187,42 @@ int main(int argc, char** argv)
 	// --------------------------------------------------------------------------
 	glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 	float ambientStrength = 0.025f;
+	float constant = 1.0f;
+	float linear = 0.09;
+	float quadratic = 0.032f;
 
-	blendedShader.Bind();
-	blendedShader.SetUniform("lightColor", lightColor);
-	blendedShader.SetUniform("ambientStrength", ambientStrength);
-	blendedShader.SetUniform("smoothness", 2.0f);
-	blendedShader.SetUniform("specularIntensity", 0.0f);
-	standardShader.Bind();
-	standardShader.SetUniform("lightColor", lightColor);
-	standardShader.SetUniform("ambientStrength", ambientStrength);
-	standardShader.SetUniform("smoothness", 128.0f);
-	phongShader.Bind();
-	phongShader.SetUniform("lightColor", lightColor);
-	phongShader.SetUniform("color", glm::vec3(1.0f, 0.36f, 0.22f));
-	phongShader.SetUniform("ambientStrength", ambientStrength);
-	phongShader.SetUniform("smoothness", 64.0f);
-	phongShader.SetUniform("specularIntensity", 0.125f);
 	solidShader.Bind();
 	solidShader.SetUniform("color", lightColor);
+
+	// uniform buffer object for lights and matrices
+	// --------------------------------------------------------------------------
+	GLuint uboMatrices, uboLighting, uboCamera;
+
+	glGenBuffers(1, &uboMatrices);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+	glBufferData(GL_UNIFORM_BUFFER, 128, nullptr, GL_DYNAMIC_DRAW);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboMatrices);
+	
+	glGenBuffers(1, &uboLighting);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboLighting);
+	glBufferData(GL_UNIFORM_BUFFER, 44, nullptr, GL_STATIC_DRAW);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 1, uboLighting);
+
+	// set lighting data now
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, 12, glm::value_ptr(lightTransform[3]));
+	glBufferSubData(GL_UNIFORM_BUFFER, 16, 12, glm::value_ptr(lightColor));
+	glBufferSubData(GL_UNIFORM_BUFFER, 28, 4, &ambientStrength);
+	glBufferSubData(GL_UNIFORM_BUFFER, 32, 4, &constant);
+	glBufferSubData(GL_UNIFORM_BUFFER, 36, 4, &linear);
+	glBufferSubData(GL_UNIFORM_BUFFER, 40, 4, &quadratic);
+
+	glGenBuffers(1, &uboCamera);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboCamera);
+	glBufferData(GL_UNIFORM_BUFFER, 16, nullptr, GL_DYNAMIC_DRAW);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 2, uboCamera);
+
+	// set model matrix
+	model.SetTransform(modelTransform);
 
 	// start currentTime 1 frame back so we don't get weird timing issues on the first frame
 	float deltaTime = 1.0f / 60.0f;
@@ -255,63 +243,26 @@ int main(int argc, char** argv)
 		// update
 		// ----------------------------------------------------------------------
 		camera.Update(deltaTime);
-		containerTransform = glm::rotate(containerTransform, glm::radians(rotationSpeed) * deltaTime, glm::vec3(1.0f, 1.0f, 1.0f));
 
 		const glm::mat4& projectionMatrix = camera.GetProjectionMatrix();
 		const glm::mat4& viewMatrix = camera.GetViewMatrix();
 		const glm::vec3 lightPos(lightTransform[3]);
 
+		// set matrix uniform buffer data
+		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, 64, glm::value_ptr(projectionMatrix));
+		glBufferSubData(GL_UNIFORM_BUFFER, 64, 64, glm::value_ptr(viewMatrix));
+
+		// same for camera
+		glBindBuffer(GL_UNIFORM_BUFFER, uboCamera);
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, 12, glm::value_ptr(camera.GetPosition()));
+
 		// render
 		// ----------------------------------------------------------------------
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// bind our textures
-		glActiveTexture(GL_TEXTURE0);
-		pTexture1->Bind();
-		glActiveTexture(GL_TEXTURE1);
-		pTexture2->Bind();
+		model.Draw();
 
-		// bind our matrices
-		blendedShader.Bind();
-		blendedShader.SetUniform("viewPos", camera.GetPosition());
-		blendedShader.SetUniform("model", transform);
-		blendedShader.SetUniform("view", viewMatrix);
-		blendedShader.SetUniform("projection", projectionMatrix);
-		blendedShader.SetUniform("lightPosition", lightPos);
-
-		// do the actual rendering
-		glBindVertexArray(vao);
-		//glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
-
-		// repeat for container
-		glActiveTexture(GL_TEXTURE0);
-		pDiffuse->Bind();
-		glActiveTexture(GL_TEXTURE1);
-		pSpecular->Bind();
-
-		standardShader.Bind();
-		standardShader.SetUniform("viewPos", camera.GetPosition());
-		standardShader.SetUniform("model", containerTransform);
-		standardShader.SetUniform("view", viewMatrix);
-		standardShader.SetUniform("projection", projectionMatrix);
-		standardShader.SetUniform("lightPosition", lightPos);
-		//glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
-
-		// repeat for backpack
-		glActiveTexture(GL_TEXTURE0);
-		pBackpackDiffuse->Bind();
-		glActiveTexture(GL_TEXTURE1);
-		pBackpackSpecular->Bind();
-		standardShader.Bind();
-		standardShader.SetUniform("viewPos", camera.GetPosition());
-		standardShader.SetUniform("model", backpackTransform);
-		standardShader.SetUniform("view", viewMatrix);
-		standardShader.SetUniform("projection", projectionMatrix);
-		standardShader.SetUniform("lightPosition", lightPos);
-		//backpackMesh.Draw();
-		backpack.Draw();
-
-		// repeat for light
 		glBindVertexArray(vao);
 		solidShader.Bind();
 		solidShader.SetUniform("model", lightTransform);

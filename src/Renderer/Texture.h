@@ -25,7 +25,7 @@ enum TextureFilterMode
 
 struct TextureParams
 {
-	TextureFilterMode filterMode = FM_BILINEAR;
+	TextureFilterMode filterMode = FM_TRILINEAR;
 	TextureWrapMode wrapMode = WM_REPEAT;
 	glm::vec4 borderColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	bool bGenerateMips = true;

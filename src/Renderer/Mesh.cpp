@@ -62,11 +62,9 @@ void Mesh::GenerateBuffers()
 	glBindVertexArray(0);
 }
 
-void Mesh::Draw() const
+void Mesh::Draw()
 {
-	// TODO: come up with a way to determine which texture index to use
-	/*glActiveTexture(GL_TEXTURE0);
-	mDiffuse.Bind();*/
+	m_material.ApplyParams();
 
 	glBindVertexArray(m_vao);
 	glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);

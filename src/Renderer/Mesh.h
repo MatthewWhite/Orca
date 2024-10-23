@@ -27,7 +27,7 @@ public:
 
 	Material& GetMaterial() { return m_material; }
 
-	void Draw() const;
+	void Draw();
 
 private:
 	void GenerateBuffers();
