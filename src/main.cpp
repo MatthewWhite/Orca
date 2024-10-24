@@ -169,8 +169,8 @@ int main(int argc, char** argv)
 	const float nearPlane = 0.1f;
 	const float farPlane = 1000.0f;
 	Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT, fov, nearPlane, farPlane);
-	camera.SetPosition(glm::vec3(5.0f, 0.0f, -1.85f));
-	camera.LookAt(glm::vec3(0.0f, 1.0f, -1.85f));
+	camera.SetPosition(glm::vec3(7.0f, 1.0f, -1.85f));
+	camera.LookAt(glm::vec3(0.0f, 0.8f, -1.85f));
 	camera.SetMovementSpeed(2.0f);
 
 	// transforms
@@ -186,10 +186,8 @@ int main(int argc, char** argv)
 	// lighting data
 	// --------------------------------------------------------------------------
 	glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-	float ambientStrength = 0.025f;
-	float constant = 1.0f;
-	float linear = 0.09;
-	float quadratic = 0.032f;
+	float ambientStrength = 0.001f;
+	float flux = 3.0f;
 
 	solidShader.Bind();
 	solidShader.SetUniform("color", lightColor);
@@ -205,16 +203,14 @@ int main(int argc, char** argv)
 	
 	glGenBuffers(1, &uboLighting);
 	glBindBuffer(GL_UNIFORM_BUFFER, uboLighting);
-	glBufferData(GL_UNIFORM_BUFFER, 44, nullptr, GL_STATIC_DRAW);
+	glBufferData(GL_UNIFORM_BUFFER, 36, nullptr, GL_STATIC_DRAW);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, uboLighting);
 
 	// set lighting data now
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, 12, glm::value_ptr(lightTransform[3]));
 	glBufferSubData(GL_UNIFORM_BUFFER, 16, 12, glm::value_ptr(lightColor));
 	glBufferSubData(GL_UNIFORM_BUFFER, 28, 4, &ambientStrength);
-	glBufferSubData(GL_UNIFORM_BUFFER, 32, 4, &constant);
-	glBufferSubData(GL_UNIFORM_BUFFER, 36, 4, &linear);
-	glBufferSubData(GL_UNIFORM_BUFFER, 40, 4, &quadratic);
+	glBufferSubData(GL_UNIFORM_BUFFER, 32, 4, &flux);
 
 	glGenBuffers(1, &uboCamera);
 	glBindBuffer(GL_UNIFORM_BUFFER, uboCamera);

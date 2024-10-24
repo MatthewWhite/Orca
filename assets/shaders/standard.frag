@@ -12,11 +12,7 @@ struct PointLight
 	vec3 position;
 	vec3 color;
 	float ambientStrength;
-
-	// attenuation
-	float constant;
-	float linear;
-	float quadratic;
+	float flux;
 };
 
 in vec3 v_fragPos;
@@ -38,44 +34,45 @@ layout (std140, binding=2) uniform Camera
 
 out vec4 fragColor;
 
-vec3 shadeBlinnPhong(vec3 diffuse, vec3 specular, vec3 ambient, float shininess, vec3 lightColor, vec3 lightDirection, vec3 eyeDirection, vec3 normal)
+vec3 blinnPhongBRDF(vec3 lightDirection, vec3 viewDirection, vec3 normal, vec3 diffuse, vec3 specular, float shininess)
 {
-	vec3 halfwayDirection = normalize(lightDirection + eyeDirection);
+	vec3 halfwayDirection = normalize(lightDirection + viewDirection);
+	float specDot = max(dot(halfwayDirection, normal), 0.0);
+	return diffuse + pow(specDot, shininess) * specular;
+}
 
-	float diffuseIntensity  = max(dot(normal, lightDirection), 0.0);
-	float specularIntensity = pow(max(dot(normal, halfwayDirection), 0.0), material.shininess) * (1 - pow(1-diffuseIntensity, 3));
+vec3 rgb2lin(vec3 rgb)
+{
+	return pow(rgb, vec3(2.2));
+}
 
-	vec3 result = vec3(0.0f);
-	result += lightColor * diffuse  * diffuseIntensity;
-	result += lightColor * specular * specularIntensity;
-	result += lightColor * ambient  * light.ambientStrength;
-
-	return result;
+vec3 lin2rgb(vec3 lin)
+{
+	return pow(lin, vec3(1.0/2.2));
 }
 
 void main()
 {
-	float gamma = 2.2;
 	float distance = length(light.position - v_fragPos);
-	float attenuation = 1.0 / (light.constant + (light.linear * distance) + (light.quadratic * distance * distance));
-	attenuation = 1.0 / (distance * distance);
 
 	vec3 normal = normalize(v_normal);
-	vec3 eyeDirection = normalize(viewPos - v_fragPos);
+	vec3 viewDirection = normalize(viewPos - v_fragPos);
 	vec3 lightDirection = normalize(light.position - v_fragPos);
 
 	vec4 diffuse  = texture(material.diffuse, v_uv1);
-	vec3 specular = vec3(texture(material.specular, v_uv1));
-	vec3 ambient  = diffuse.rgb;
+	vec3 specular = vec3(texture(material.specular, v_uv1).r);
+	vec3 ambient  = diffuse.rgb * light.ambientStrength;
 
 	if (diffuse.a <= 0.1)
 	{
 		discard;
 	}
 
-	vec3 shadedColor = shadeBlinnPhong(diffuse.rgb, specular, ambient, material.shininess, light.color, lightDirection, eyeDirection, normal);
+	vec3 radiance = ambient;
+	float irradiance = max(dot(lightDirection, normal), 0.0) * light.flux / (3.14159 * distance * distance);
+	vec3 brdf = blinnPhongBRDF(lightDirection, viewDirection, normal, diffuse.rgb, specular, material.shininess);
+	radiance += brdf * irradiance * rgb2lin(light.color);
 
-	fragColor = vec4(shadedColor, 1.0);
-	fragColor.rgb *= attenuation;
-	fragColor.rgb = pow(fragColor.rgb, vec3(1.0/gamma));
+	fragColor.rgb = lin2rgb(radiance);
+	fragColor.a = diffuse.a;
 }

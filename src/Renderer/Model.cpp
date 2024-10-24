@@ -136,13 +136,13 @@ Mesh* Model::ProcessAssimpMesh(const aiMesh* pMesh, const aiScene* pScene)
 		Material& material = mesh->GetMaterial();
 
 		float shininess = 0.0f;
-		auto ret = aiMat->Get(AI_MATKEY_SHININESS, shininess);
+		aiMat->Get(AI_MATKEY_SHININESS, shininess);
 		material.SetFloat("material.shininess", shininess);
 
 		if (aiMat->GetTextureCount(aiTextureType_DIFFUSE) > 0)
 		{
 			aiString diffuseTexture;
-			ret = aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &diffuseTexture);
+			aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &diffuseTexture);
 			Texture* pDiffuse = TextureManager::GetInstance()->CreateTexture(m_directory + diffuseTexture.C_Str(), true);
 			material.SetInteger("material.diffuse", 0);
 			material.SetTexture("material.diffuse", pDiffuse);
@@ -151,7 +151,7 @@ Mesh* Model::ProcessAssimpMesh(const aiMesh* pMesh, const aiScene* pScene)
 		if (aiMat->GetTextureCount(aiTextureType_SPECULAR) > 0)
 		{
 			aiString specularTexture;
-			ret = aiMat->GetTexture(aiTextureType_SPECULAR, 0, &specularTexture);
+			aiMat->GetTexture(aiTextureType_SPECULAR, 0, &specularTexture);
 			Texture* pSpecular = TextureManager::GetInstance()->CreateTexture(m_directory + specularTexture.C_Str());
 			material.SetInteger("material.specular", 1);
 			material.SetTexture("material.specular", pSpecular);

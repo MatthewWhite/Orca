@@ -35,7 +35,7 @@ void Texture::Load(const std::string& filename, const TextureParams& params, boo
 	stbi_set_flip_vertically_on_load(params.bFlipVerticallyOnLoad);
 
 	int numChannels;
-	unsigned char* pTextureData = stbi_load(filename.c_str(), &m_width, &m_height, &numChannels, 0);
+	unsigned char* pTextureData = stbi_load(filename.c_str(), &m_width, &m_height, &numChannels, params.forceComponents);
 	if (!pTextureData)
 	{
 		printf("Failed to load texture \"%s\"\n", filename.c_str());
