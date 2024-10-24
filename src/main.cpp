@@ -187,7 +187,6 @@ int main(int argc, char** argv)
 	// --------------------------------------------------------------------------
 	glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 	float ambientStrength = 0.001f;
-	float flux = 3.0f;
 
 	solidShader.Bind();
 	solidShader.SetUniform("color", lightColor);
@@ -203,14 +202,13 @@ int main(int argc, char** argv)
 	
 	glGenBuffers(1, &uboLighting);
 	glBindBuffer(GL_UNIFORM_BUFFER, uboLighting);
-	glBufferData(GL_UNIFORM_BUFFER, 36, nullptr, GL_STATIC_DRAW);
+	glBufferData(GL_UNIFORM_BUFFER, 32, nullptr, GL_STATIC_DRAW);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, uboLighting);
 
 	// set lighting data now
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, 12, glm::value_ptr(lightTransform[3]));
 	glBufferSubData(GL_UNIFORM_BUFFER, 16, 12, glm::value_ptr(lightColor));
 	glBufferSubData(GL_UNIFORM_BUFFER, 28, 4, &ambientStrength);
-	glBufferSubData(GL_UNIFORM_BUFFER, 32, 4, &flux);
 
 	glGenBuffers(1, &uboCamera);
 	glBindBuffer(GL_UNIFORM_BUFFER, uboCamera);

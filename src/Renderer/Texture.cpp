@@ -41,6 +41,7 @@ void Texture::Load(const std::string& filename, const TextureParams& params, boo
 		printf("Failed to load texture \"%s\"\n", filename.c_str());
 		return;
 	}
+	numChannels = params.forceComponents == 0 ? numChannels : params.forceComponents;
 
 	GLenum format = GL_RGBA;
 	GLenum internalFormat = format;

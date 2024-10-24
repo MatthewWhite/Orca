@@ -14,7 +14,7 @@ Mesh::Mesh()
 	, m_vbo(0)
 	, m_ebo(0)
 {
-	m_material.SetShader("assets/shaders/standard.vert", "assets/shaders/standard.frag");
+	m_material.SetShader("assets/shaders/blinnPhong.vert", "assets/shaders/blinnPhong.frag");
 }
 
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int> indices)
@@ -25,7 +25,7 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int> 
 	, m_ebo(0)
 {
 	GenerateBuffers();
-	m_material.SetShader("assets/shaders/standard.vert", "assets/shaders/standard.frag");
+	m_material.SetShader("assets/shaders/blinnPhong.vert", "assets/shaders/blinnPhong.frag");
 }
 
 Mesh::~Mesh()

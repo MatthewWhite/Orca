@@ -143,7 +143,9 @@ Mesh* Model::ProcessAssimpMesh(const aiMesh* pMesh, const aiScene* pScene)
 		{
 			aiString diffuseTexture;
 			aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &diffuseTexture);
-			Texture* pDiffuse = TextureManager::GetInstance()->CreateTexture(m_directory + diffuseTexture.C_Str(), true);
+			TextureParams params;
+			params.filterMode = FM_TRILINEAR;
+			Texture* pDiffuse = TextureManager::GetInstance()->CreateTexture(m_directory + diffuseTexture.C_Str(), params, true);
 			material.SetInteger("material.diffuse", 0);
 			material.SetTexture("material.diffuse", pDiffuse);
 		}
@@ -152,7 +154,10 @@ Mesh* Model::ProcessAssimpMesh(const aiMesh* pMesh, const aiScene* pScene)
 		{
 			aiString specularTexture;
 			aiMat->GetTexture(aiTextureType_SPECULAR, 0, &specularTexture);
-			Texture* pSpecular = TextureManager::GetInstance()->CreateTexture(m_directory + specularTexture.C_Str());
+			TextureParams params;
+			params.filterMode = FM_TRILINEAR;
+			params.forceComponents = 3;
+			Texture* pSpecular = TextureManager::GetInstance()->CreateTexture(m_directory + specularTexture.C_Str(), params, true);
 			material.SetInteger("material.specular", 1);
 			material.SetTexture("material.specular", pSpecular);
 		}
