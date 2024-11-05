@@ -8,10 +8,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Components/Transform.h"
 #include "Core/InputManager.h"
 #include "Renderer/Camera.h"
 #include "Renderer/Mesh.h"
-#include "Renderer/Model.h"
+#include "Components/ModelRenderer.h"
 #include "Renderer/Shader.h"
 #include "Renderer/Texture.h"
 #include "Renderer/TextureManager.h"
@@ -124,7 +125,7 @@ int main(int argc, char** argv)
 
 	// set up vertex data and attributes
 	// --------------------------------------------------------------------------
-	Model model;
+	ModelRenderer model;
 	{
 		 auto start = glfwGetTime();
 		 model.LoadModel("assets/models/sponza/sponza.obj");
@@ -169,19 +170,23 @@ int main(int argc, char** argv)
 	const float nearPlane = 0.1f;
 	const float farPlane = 1000.0f;
 	Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT, fov, nearPlane, farPlane);
-	camera.SetPosition(glm::vec3(7.0f, 1.0f, -1.85f));
-	camera.LookAt(glm::vec3(0.0f, 0.8f, -1.85f));
+	camera.SetPosition(glm::vec3(8.0f, 2.0f, -0.35f));
+	camera.LookAt(glm::vec3(1.0f, 1.8f, -0.35f));
 	camera.SetMovementSpeed(2.0f);
 
 	// transforms
 	// --------------------------------------------------------------------------
 	glm::mat4 modelTransform(1.0f);
-	modelTransform = glm::translate(modelTransform, glm::vec3(-1.0f, -1.0f, -1.5f));
+	//modelTransform = glm::translate(modelTransform, glm::vec3(-1.0f, -1.0f, -1.5f));
 	modelTransform = glm::scale(modelTransform, glm::vec3(0.01f, 0.01f, 0.01f));
 
-	glm::mat4 lightTransform = glm::mat4(1.0f);
-	lightTransform = glm::translate(lightTransform, glm::vec3(-3.0f, 1.3f, -0.7f));
-	lightTransform = glm::scale(lightTransform, glm::vec3(0.25f));
+	Transform lightTransform;
+	lightTransform.SetLocalPosition(-2.0f, 2.3f, 0.8f);
+	lightTransform.SetLocalScale(0.25f);
+
+	Transform debugCubeTransform;
+	debugCubeTransform.SetLocalPosition(0.0f, 2.0f, 0.0f);
+	debugCubeTransform.SetLocalRotationFromEulerAngles(45.0f, 0.0f, 45.0f);
 
 	// lighting data
 	// --------------------------------------------------------------------------
@@ -206,7 +211,7 @@ int main(int argc, char** argv)
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, uboLighting);
 
 	// set lighting data now
-	glBufferSubData(GL_UNIFORM_BUFFER, 0, 12, glm::value_ptr(lightTransform[3]));
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, 12, glm::value_ptr(lightTransform.GetLocalPosition()));
 	glBufferSubData(GL_UNIFORM_BUFFER, 16, 12, glm::value_ptr(lightColor));
 	glBufferSubData(GL_UNIFORM_BUFFER, 28, 4, &ambientStrength);
 
@@ -240,7 +245,7 @@ int main(int argc, char** argv)
 
 		const glm::mat4& projectionMatrix = camera.GetProjectionMatrix();
 		const glm::mat4& viewMatrix = camera.GetViewMatrix();
-		const glm::vec3 lightPos(lightTransform[3]);
+		const glm::vec3 lightPos = lightTransform.GetLocalPosition();
 
 		// set matrix uniform buffer data
 		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
@@ -259,9 +264,13 @@ int main(int argc, char** argv)
 
 		glBindVertexArray(vao);
 		solidShader.Bind();
-		solidShader.SetUniform("model", lightTransform);
+		solidShader.SetUniform("model", lightTransform.GetWorldMatrix());
 		solidShader.SetUniform("view", viewMatrix);
 		solidShader.SetUniform("projection", projectionMatrix);
+		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
+
+		// debug cube
+		solidShader.SetUniform("model", debugCubeTransform.GetWorldMatrix());
 		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
 
 		// swap buffers and poll IO events

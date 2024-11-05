@@ -1,26 +1,27 @@
-#include "Model.h"
+#include "ModelRenderer.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <glm/glm.hpp>
 
-#include "TextureManager.h"
+#include "Renderer/Mesh.h"
+#include "Renderer/TextureManager.h"
 
 // TEMP
 #include "Core/InputManager.h"
 
-Model::Model()
+ModelRenderer::ModelRenderer()
 	: m_meshes()
 	, m_directory("")
 {
 }
 
-Model::~Model()
+ModelRenderer::~ModelRenderer()
 {
 }
 
-void Model::LoadModel(const std::string& filename)
+void ModelRenderer::LoadModel(const std::string& filename)
 {
 	m_meshes.clear();
 
@@ -48,7 +49,7 @@ void Model::LoadModel(const std::string& filename)
 	ProcessAssimpNode(pScene->mRootNode, pScene);
 }
 
-void Model::Draw() const
+void ModelRenderer::Draw() const
 {
 	for (const auto it : m_meshes)
 	{
@@ -71,7 +72,7 @@ void Model::Draw() const
 }
 
 // TEMP
-void Model::SetTransform(const glm::mat4& transform)
+void ModelRenderer::SetTransform(const glm::mat4& transform)
 {
 	m_transform = transform;
 
@@ -81,7 +82,7 @@ void Model::SetTransform(const glm::mat4& transform)
 	}
 }
 
-void Model::ProcessAssimpNode(const aiNode* pNode, const aiScene* pScene)
+void ModelRenderer::ProcessAssimpNode(const aiNode* pNode, const aiScene* pScene)
 {
 	for (unsigned int i = 0; i < pNode->mNumMeshes; ++i)
 	{
@@ -94,7 +95,7 @@ void Model::ProcessAssimpNode(const aiNode* pNode, const aiScene* pScene)
 	}
 }
 
-Mesh* Model::ProcessAssimpMesh(const aiMesh* pMesh, const aiScene* pScene)
+Mesh* ModelRenderer::ProcessAssimpMesh(const aiMesh* pMesh, const aiScene* pScene)
 {
 	std::vector<Mesh::Vertex> vertices;
 	vertices.reserve(pMesh->mNumVertices);
