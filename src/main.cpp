@@ -177,7 +177,6 @@ int main(int argc, char** argv)
 	// transforms
 	// --------------------------------------------------------------------------
 	glm::mat4 modelTransform(1.0f);
-	//modelTransform = glm::translate(modelTransform, glm::vec3(-1.0f, -1.0f, -1.5f));
 	modelTransform = glm::scale(modelTransform, glm::vec3(0.01f, 0.01f, 0.01f));
 
 	Transform lightTransform;
@@ -186,7 +185,18 @@ int main(int argc, char** argv)
 
 	Transform debugCubeTransform;
 	debugCubeTransform.SetLocalPosition(0.0f, 2.0f, 0.0f);
-	debugCubeTransform.SetLocalRotationFromEulerAngles(45.0f, 0.0f, 45.0f);
+	//debugCubeTransform.SetLocalRotationFromEulerAngles(45.0f, 0.0f, 0.0f);
+
+	Transform debugSmallerCubeTransform;
+	debugSmallerCubeTransform.SetParent(&debugCubeTransform);
+	debugSmallerCubeTransform.SetLocalPosition(0.0f, 1.0f, 0.0);
+	//debugSmallerCubeTransform.SetLocalRotationFromEulerAngles(0.0f, 45.0f, 0.0f);
+	debugSmallerCubeTransform.SetScale(0.5f);
+
+	Transform debugSmallestCubeTransform;
+	debugSmallestCubeTransform.SetParent(&debugSmallerCubeTransform);
+	debugSmallestCubeTransform.SetLocalPosition(0.0f, 0.0f, 1.0f);
+	debugSmallestCubeTransform.SetScale(0.25f);
 
 	// lighting data
 	// --------------------------------------------------------------------------
@@ -243,6 +253,15 @@ int main(int argc, char** argv)
 		// ----------------------------------------------------------------------
 		camera.Update(deltaTime);
 
+		// test transform hierarchy by rotating larger cube
+		glm::quat rot = debugCubeTransform.GetLocalRotation();
+		rot = glm::quat(glm::radians(glm::vec3(45.0f * deltaTime, 0.0f, 0.0f))) * rot;
+		debugCubeTransform.SetLocalRotationFromEulerAngles(glm::degrees(glm::eulerAngles(rot)));
+
+		glm::quat rot2 = debugSmallerCubeTransform.GetLocalRotation();
+		rot2 = glm::quat(glm::radians(glm::vec3(0.0f, 45.0f * deltaTime, 0.0f))) * rot2;
+		debugSmallerCubeTransform.SetLocalRotationFromEulerAngles(glm::degrees(glm::eulerAngles(rot2)));
+
 		const glm::mat4& projectionMatrix = camera.GetProjectionMatrix();
 		const glm::mat4& viewMatrix = camera.GetViewMatrix();
 		const glm::vec3 lightPos = lightTransform.GetLocalPosition();
@@ -267,10 +286,20 @@ int main(int argc, char** argv)
 		solidShader.SetUniform("model", lightTransform.GetWorldMatrix());
 		solidShader.SetUniform("view", viewMatrix);
 		solidShader.SetUniform("projection", projectionMatrix);
+		solidShader.SetUniform("color", lightColor);
 		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
 
 		// debug cube
 		solidShader.SetUniform("model", debugCubeTransform.GetWorldMatrix());
+		solidShader.SetUniform("color", glm::vec3(1.0f, 0.0f, 0.0f));
+		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
+		// debug smaller cube
+		solidShader.SetUniform("model", debugSmallerCubeTransform.GetWorldMatrix());
+		solidShader.SetUniform("color", glm::vec3(0.0f, 1.0f, 0.0f));
+		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
+		// debug smallest cube
+		solidShader.SetUniform("model", debugSmallestCubeTransform.GetWorldMatrix());
+		solidShader.SetUniform("color", glm::vec3(0.0f, 0.0f, 1.0f));
 		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
 
 		// swap buffers and poll IO events
